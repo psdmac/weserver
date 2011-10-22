@@ -1,0 +1,43 @@
+Definition of Servers
+---------------------
+
+1, WeEcho
+    # bind this address to requset replies
+    hostreqq = tcp://*:2099
+    
+2, WeUserManager
+    // bind this port for user registering, identifying ant other works
+    exports.port = 2080
+    
+3, WeBridge
+    # bind this address to receive data
+    hostpull = tcp://*:2011
+    # bind this address to publish data
+    hostpubb = tcp://*:2012
+    
+4, WeTerminalGT02A
+    # bind this port to talk with GT02As
+    tcpport = 2013
+    
+5, WeRealtimeGT02A
+    # deprecated, will be merge into WeRealtimeGT02ANode
+    # bind this address to push terminal json data
+    hostpush = tcp://*:2014
+    
+6, WeRealtimeGT02ANode
+    // bind this port to talk with terminals in browser
+    exports.port = 2015;
+    
+7, WeHistoryGT02A
+    // bind this port to talk with terminals in browser
+    exports.port = 2016
+    
+
+Definition of Terminals
+-----------------------
+
+1, GT02A
+    ttype = A # terminal type
+    dtype = g # data type, gps pvt data
+    dtype = s # data type, status pgg data
+    

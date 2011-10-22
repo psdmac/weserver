@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release" />
+	<File name="include/WeGT02AApp.h" open="0" top="0" tabpos="0">
+		<Cursor position="481" topLine="0" />
+	</File>
+	<File name="src/TEcho.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="104" topLine="0" />
+	</File>
+	<File name="src/WeGT02AApp.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="598" topLine="12" />
+	</File>
+</CodeBlocks_layout_file>
