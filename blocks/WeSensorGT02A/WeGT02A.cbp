@@ -30,6 +30,7 @@
 			<Add option="`wx-config --libs`" />
 			<Add library="zmq" />
 		</Linker>
+		<Unit filename="include/GT02A.h" />
 		<Unit filename="include/TEcho.h" />
 		<Unit filename="include/WeGT02AApp.h" />
 		<Unit filename="src/TEcho.cpp" />

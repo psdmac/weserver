@@ -46,6 +46,7 @@ bool WeGT02AApp::OnInit()
     m_hb[3] = 0x0d;
     m_hb[4] = 0x0a;
 
+    // bind event handlers
     Bind(wxEVT_SOCKET, &WeGT02AApp::OnServer, this, WeGT02AApp::ID_SERVER);
     Bind(wxEVT_SOCKET, &WeGT02AApp::OnClient, this, WeGT02AApp::ID_CLIENT);
 
@@ -77,10 +78,13 @@ void WeGT02AApp::LoadConfigurations(const wxString& file)
 {
     wxFileConfig *pConf;
     pConf = new wxFileConfig("", "", file, "", wxCONFIG_USE_LOCAL_FILE);
-    pConf->Read(_T("/WeSensorGT02A/tcpport"), &m_port, 2013);
+    pConf->Read(_T("/WeSensorGT02A/tcpport"), &m_port, 2100);
     pConf->Read(_T("/WeSensorGT02A/model"), &m_model, "A");
     pConf->Read(_T("/WeSensorGT02A/gtype"), &m_gtype, "g");
     pConf->Read(_T("/WeSensorGT02A/stype"), &m_stype, "s");
+    pConf->Read(_T("/WeSensorGT02A/lograwdata"), &m_logRawData, 1);
+    pConf->Read(_T("/WeSensorGT02A/logdecoded"), &m_logDecoded, 1);
+    pConf->Read(_T("/WeSensorGT02A/logclients"), &m_logClients, 1);
     pConf->Read(_T("/WeBridge/host"), &m_bridge, "tcp://127.0.0.1:2011");
     pConf->Read(_T("/WeEcho/host"), &m_echo, "tcp://127.0.0.1:2099");
     delete pConf;
@@ -89,6 +93,9 @@ void WeGT02AApp::LoadConfigurations(const wxString& file)
               << ", /WeSensorGT02A/model = " << m_model
               << ", /WeSensorGT02A/gtype = " << m_gtype
               << ", /WeSensorGT02A/stype = " << m_stype
+              << ", /WeSensorGT02A/lograwdata = " << m_logRawData
+              << ", /WeSensorGT02A/logdecoded = " << m_logDecoded
+              << ", /WeSensorGT02A/logclients = " << m_logClients
               << ", /WeBridge/host = " << m_bridge
               << ", /WeEcho/host = " << m_echo << std::endl;
 }
@@ -169,10 +176,17 @@ void WeGT02AApp::OnServer(wxSocketEvent& event)
         pSock->SetNotify(wxSOCKET_INPUT_FLAG | wxSOCKET_LOST_FLAG);
         pSock->Notify(true);
         m_lClients.push_back(pSock);
-        //std::cout << "one client accepted" << std::endl;
+        if (m_logClients != 0) {
+            wxIPV4address addr;
+            pSock->GetPeer(addr);
+            std::cout << time(NULL) << " accept " << addr.IPAddress()
+                      << ":" << addr.Service() << ", "
+                      << GetClientCount() << " clients now" << std::endl;
+        }
     } else if (m_pServer->Error()) {
         // log error here
-        std::cout << time(NULL) << " failed to accept new client" << std::endl;
+        std::cout << time(NULL) << " error on accepting new client, "
+                  << GetClientCount() << " clients now" << std::endl;
     }
 }
 
@@ -180,8 +194,15 @@ void WeGT02AApp::OnClient(wxSocketEvent& event)
 {
     wxSocketBase *pSock = event.GetSocket();
     if (!pSock->IsOk()) {
-        pSock->Destroy();
         m_lClients.remove(pSock);
+        if (m_logClients != 0) {
+            wxIPV4address addr;
+            pSock->GetPeer(addr);
+            std::cout << time(NULL) << " error on " << addr.IPAddress()
+                      << ":" << addr.Service() << ", "
+                      << GetClientCount() << " clients now" << std::endl;
+        }
+        pSock->Destroy();
         return;
     }
 
@@ -190,8 +211,15 @@ void WeGT02AApp::OnClient(wxSocketEvent& event)
         ProcessData(pSock);
         break;
     case wxSOCKET_LOST:
-        pSock->Destroy();
         m_lClients.remove(pSock);
+        if (m_logClients != 0) {
+            wxIPV4address addr;
+            pSock->GetPeer(addr);
+            std::cout << time(NULL) << " lost " << addr.IPAddress()
+                      << ":" << addr.Service() << ", "
+                      << GetClientCount() << " clients now" << std::endl;
+        }
+        pSock->Destroy();
         //std::cout << "one client lost" << std::endl;
         break;
     default:
@@ -208,10 +236,23 @@ void WeGT02AApp::ProcessData(wxSocketBase *pSock)
 {
     // get data from buffer
     pSock->Read(m_buffer, SOCKET_BUFFER_SIZE);
+    wxIPV4address addr;
+    pSock->GetPeer(addr);
     int len = pSock->LastCount();
+
+    if (m_logRawData != 0) {
+        // log raw data of buffer
+        std::cout << time(NULL) << " receive " << len << " bytes from "
+                  << addr.IPAddress() << ":" << addr.Service() << ": ";
+        for (int i = 0; i < len; i++) {
+            printf("%02X", (unsigned char)(*(m_buffer+i)));
+        }
+        std::cout << std::endl;
+    }
+
     if (len <= 0 && pSock->Error()) {
-        std::cout << time(NULL)
-                  << " failed to read socket buffer" << std::endl;
+        std::cout << time(NULL) << " error on reading buffer of socket "
+                  << addr.IPAddress() << ":" << addr.Service() << std::endl;
         return;
     } else if (len < 16) {
         std::cout << time(NULL)
@@ -219,6 +260,7 @@ void WeGT02AApp::ProcessData(wxSocketBase *pSock)
         return;
     }
 
+    // try to decode raw data
     int fh = 0; // head of frame
     while (fh < len-18) {
         // validate frame
@@ -239,8 +281,14 @@ void WeGT02AApp::ProcessData(wxSocketBase *pSock)
             pSock->Write(m_hb, sizeof(m_hb));
             if (pSock->LastCount() < 1 && pSock->Error()) {
                 std::cout << time(NULL)
-                          << " failed to send heartbeat feedback"<< std::endl;
+                          << " error on sending heartbeat feedback to "
+                          << addr.IPAddress() << ":" << addr.Service() << std::endl;
+            } else if (m_logRawData) {
+                std::cout << time(NULL)
+                          << " send 5 bytes to " << addr.IPAddress() << ":" << addr.Service()
+                          << ": 54681A0D0A" << std::endl;
             }
+
             // then decode pgg data
             DecodePGG(m_buffer+fh, fsize);
             PushData(false);
@@ -296,23 +344,23 @@ void WeGT02AApp::DecodePVT(const char *buf, int len)
     m_pvt.strun = ll>>5 & 0x01;
     // done
     m_pvt.valid = true;
-    /*
+    if (m_logDecoded) {
         std::cout.precision(16);
-        std::cout << "pvt---" << std::endl
-        << "model: " << char(m_pvt.model) << std::endl
-        << "dtype: " << char(m_pvt.dtype) << std::endl
-        << " imei: " << m_pvt.imei << std::endl
-        << "  fsn: " << m_pvt.fsn << std::endl
-        << "    t: " << m_pvt.t << std::endl
-        << "  lat: " << m_pvt.lat << std::endl
-        << "  lon: " << m_pvt.lon << std::endl
-        << "    c: " << m_pvt.c << std::endl
-        << "    v: " << int(m_pvt.v) << std::endl
-        << "stgps: " << int(m_pvt.stgps) << std::endl
-        << "stpow: " << int(m_pvt.stpow) << std::endl
-        << "stsos: " << int(m_pvt.stsos) << std::endl
-        << "strun: " << int(m_pvt.strun) << std::endl;
-    */
+        std::cout << time(NULL) << " pvt---" << std::endl
+                  << "model: " << char(m_pvt.model) << std::endl
+                  << "dtype: " << char(m_pvt.dtype) << std::endl
+                  << " imei: " << m_pvt.imei << std::endl
+                  << "  fsn: " << m_pvt.fsn << std::endl
+                  << "    t: " << m_pvt.t << std::endl
+                  << "  lat: " << m_pvt.lat << std::endl
+                  << "  lon: " << m_pvt.lon << std::endl
+                  << "    c: " << m_pvt.c << std::endl
+                  << "    v: " << int(m_pvt.v) << std::endl
+                  << "stgps: " << int(m_pvt.stgps) << std::endl
+                  << "stpow: " << int(m_pvt.stpow) << std::endl
+                  << "stsos: " << int(m_pvt.stsos) << std::endl
+                  << "strun: " << int(m_pvt.strun) << std::endl;
+    }
 }
 
 void WeGT02AApp::DecodePGG(const char *buf, int len)
@@ -337,18 +385,18 @@ void WeGT02AApp::DecodePGG(const char *buf, int len)
     m_pgg.nsate = buf[17];
     // done
     m_pgg.valid = true;
-    /*
-        std::cout << "pgg---" << std::endl
-        << "model: " << char(m_pgg.model) << std::endl
-        << "dtype: " << char(m_pgg.dtype) << std::endl
-        << " imei: " << m_pgg.imei << std::endl
-        << "  fsn: " << m_pgg.fsn << std::endl
-        << "    t: " << m_pgg.t << std::endl
-        << "stpow: " << int(m_pgg.stpow) << std::endl
-        << "stgsm: " << int(m_pgg.stgsm) << std::endl
-        << "stgps: " << int(m_pgg.stgps) << std::endl
-        << "nsate: " << int(m_pgg.nsate) << std::endl;
-    */
+    if (m_logDecoded) {
+        std::cout << time(NULL) << " pgg---" << std::endl
+                  << "model: " << char(m_pgg.model) << std::endl
+                  << "dtype: " << char(m_pgg.dtype) << std::endl
+                  << " imei: " << m_pgg.imei << std::endl
+                  << "  fsn: " << m_pgg.fsn << std::endl
+                  << "    t: " << m_pgg.t << std::endl
+                  << "stpow: " << int(m_pgg.stpow) << std::endl
+                  << "stgsm: " << int(m_pgg.stgsm) << std::endl
+                  << "stgps: " << int(m_pgg.stgps) << std::endl
+                  << "nsate: " << int(m_pgg.nsate) << std::endl;
+    }
 }
 
 void WeGT02AApp::PushData(bool bPVT)

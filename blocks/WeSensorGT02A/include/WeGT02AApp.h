@@ -14,7 +14,7 @@
 #include <wx/socket.h>
 #include <list>
 #include <zmq.hpp>
-#include "../../common/wedata.h"
+#include "GT02A.h"
 
 class WeGT02AApp : public wxAppConsole
 {
@@ -36,6 +36,9 @@ public:
     wxString m_model;
     wxString m_gtype;
     wxString m_stype;
+    long m_logRawData;
+    long m_logDecoded;
+    long m_logClients;
 
 private:
     void LoadConfigurations(const wxString& file);
