@@ -88,16 +88,16 @@ void WeGT02AApp::LoadConfigurations(const wxString& file)
     pConf->Read(_T("/WeBridge/host"), &m_bridge, "tcp://127.0.0.1:2011");
     pConf->Read(_T("/WeEcho/host"), &m_echo, "tcp://127.0.0.1:2099");
     delete pConf;
-    std::cout << time(NULL)
-              << " /WeSensorGT02A/tcpport = " << m_port
-              << ", /WeSensorGT02A/model = " << m_model
-              << ", /WeSensorGT02A/gtype = " << m_gtype
-              << ", /WeSensorGT02A/stype = " << m_stype
-              << ", /WeSensorGT02A/lograwdata = " << m_logRawData
-              << ", /WeSensorGT02A/logdecoded = " << m_logDecoded
-              << ", /WeSensorGT02A/logclients = " << m_logClients
-              << ", /WeBridge/host = " << m_bridge
-              << ", /WeEcho/host = " << m_echo << std::endl;
+    std::cout << time(NULL) << " configurations---" << std::endl
+              << "           /WeSensorGT02A/tcpport = " << m_port << std::endl
+              << "           /WeSensorGT02A/model = " << m_model << std::endl
+              << "           /WeSensorGT02A/gtype = " << m_gtype << std::endl
+              << "           /WeSensorGT02A/stype = " << m_stype << std::endl
+              << "           /WeSensorGT02A/lograwdata = " << m_logRawData << std::endl
+              << "           /WeSensorGT02A/logdecoded = " << m_logDecoded << std::endl
+              << "           /WeSensorGT02A/logclients = " << m_logClients << std::endl
+              << "           /WeBridge/host = " << m_bridge << std::endl
+              << "           /WeEcho/host = " << m_echo << std::endl;
 }
 
 bool WeGT02AApp::StartService()
@@ -347,19 +347,19 @@ void WeGT02AApp::DecodePVT(const char *buf, int len)
     if (m_logDecoded) {
         std::cout.precision(16);
         std::cout << time(NULL) << " pvt---" << std::endl
-                  << "model: " << char(m_pvt.model) << std::endl
-                  << "dtype: " << char(m_pvt.dtype) << std::endl
-                  << " imei: " << m_pvt.imei << std::endl
-                  << "  fsn: " << m_pvt.fsn << std::endl
-                  << "    t: " << m_pvt.t << std::endl
-                  << "  lat: " << m_pvt.lat << std::endl
-                  << "  lon: " << m_pvt.lon << std::endl
-                  << "    c: " << m_pvt.c << std::endl
-                  << "    v: " << int(m_pvt.v) << std::endl
-                  << "stgps: " << int(m_pvt.stgps) << std::endl
-                  << "stpow: " << int(m_pvt.stpow) << std::endl
-                  << "stsos: " << int(m_pvt.stsos) << std::endl
-                  << "strun: " << int(m_pvt.strun) << std::endl;
+                  << "           model: " << char(m_pvt.model) << std::endl
+                  << "           dtype: " << char(m_pvt.dtype) << std::endl
+                  << "            imei: " << m_pvt.imei << std::endl
+                  << "             fsn: " << m_pvt.fsn << std::endl
+                  << "               t: " << m_pvt.t << std::endl
+                  << "             lat: " << m_pvt.lat << std::endl
+                  << "             lon: " << m_pvt.lon << std::endl
+                  << "               c: " << m_pvt.c << std::endl
+                  << "               v: " << int(m_pvt.v) << std::endl
+                  << "           stgps: " << int(m_pvt.stgps) << std::endl
+                  << "           stpow: " << int(m_pvt.stpow) << std::endl
+                  << "           stsos: " << int(m_pvt.stsos) << std::endl
+                  << "           strun: " << int(m_pvt.strun) << std::endl;
     }
 }
 
@@ -387,15 +387,15 @@ void WeGT02AApp::DecodePGG(const char *buf, int len)
     m_pgg.valid = true;
     if (m_logDecoded) {
         std::cout << time(NULL) << " pgg---" << std::endl
-                  << "model: " << char(m_pgg.model) << std::endl
-                  << "dtype: " << char(m_pgg.dtype) << std::endl
-                  << " imei: " << m_pgg.imei << std::endl
-                  << "  fsn: " << m_pgg.fsn << std::endl
-                  << "    t: " << m_pgg.t << std::endl
-                  << "stpow: " << int(m_pgg.stpow) << std::endl
-                  << "stgsm: " << int(m_pgg.stgsm) << std::endl
-                  << "stgps: " << int(m_pgg.stgps) << std::endl
-                  << "nsate: " << int(m_pgg.nsate) << std::endl;
+                  << "           model: " << char(m_pgg.model) << std::endl
+                  << "           dtype: " << char(m_pgg.dtype) << std::endl
+                  << "            imei: " << m_pgg.imei << std::endl
+                  << "             fsn: " << m_pgg.fsn << std::endl
+                  << "               t: " << m_pgg.t << std::endl
+                  << "           stpow: " << int(m_pgg.stpow) << std::endl
+                  << "           stgsm: " << int(m_pgg.stgsm) << std::endl
+                  << "           stgps: " << int(m_pgg.stgps) << std::endl
+                  << "           nsate: " << int(m_pgg.nsate) << std::endl;
     }
 }
 
