@@ -57,11 +57,11 @@ void SoftGT02AApp::LoadConfigurations(const wxString& file)
     pConf->Read(_T("/Server/host"), &m_host, "127.0.0.1");
     pConf->Read(_T("/Server/port"), &m_port, 2013);
     delete pConf;
-    std::cout << time(NULL)
-        << " /SoftSensorGT02A/interval = " << m_interval
-        << ", /SoftSensorGT02A/reconnect = " << m_reconnect
-        << ", /Server/host = " << m_host
-        << ", /Server/port = " << m_port << std::endl;
+    std::cout << time(NULL) << " configurations---" << std::endl
+        << "           /SoftSensorGT02A/interval = " << m_interval << std::endl
+        << "           /SoftSensorGT02A/reconnect = " << m_reconnect << std::endl
+        << "           /Server/host = " << m_host << std::endl
+        << "           /Server/port = " << m_port << std::endl;
 }
 
 void SoftGT02AApp::SetBuffer()
