@@ -20,6 +20,7 @@
 #include <iostream>
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
+#include <netinet/in.h>
 
 IMPLEMENT_APP(WeGT02AApp);
 
@@ -40,6 +41,7 @@ bool WeGT02AApp::OnInit()
     m_pgg.model = *(m_model.mb_str()); //'A';  // GT02A
     m_pgg.dtype = *(m_stype.mb_str()); //'s';  // status
     m_pgg.valid = false;
+    memset(m_buffer, 0, SOCKET_BUFFER_SIZE);
     m_hb[0] = 0x54;
     m_hb[1] = 0x68;
     m_hb[2] = 0x1a;
@@ -245,7 +247,7 @@ void WeGT02AApp::ProcessData(wxSocketBase *pSock)
         std::cout << time(NULL) << " receive " << len << " bytes from "
                   << addr.IPAddress() << ":" << addr.Service() << ": ";
         for (int i = 0; i < len; i++) {
-            printf("%02X", (unsigned char)(*(m_buffer+i)));
+            printf("%02X", *(m_buffer+i));
         }
         std::cout << std::endl;
     }
@@ -301,16 +303,17 @@ void WeGT02AApp::ProcessData(wxSocketBase *pSock)
     }
 }
 
-void WeGT02AApp::DecodePVT(const char *buf, int len)
+void WeGT02AApp::DecodePVT(const unsigned char *buf, int len)
 {
     // terminal id
-    sprintf(m_pvt.imei, "%x", (unsigned char)buf[5]);
+    sprintf(m_pvt.imei, "%x", buf[5]);
     for (int i=6; i<=12; i++) {
-        sprintf((m_pvt.imei)+2*(i-5)-1, "%02x", (unsigned char)buf[i]);
+        sprintf((m_pvt.imei)+2*(i-5)-1, "%02x", buf[i]);
     }
     m_pvt.imei[15] = 0x00;
     // serail number of data frame
     memcpy(&m_pvt.fsn, buf+13, 2);
+    m_pvt.fsn = ntohs(m_pvt.fsn); // network > host
     // time
     unsigned short yr, mo, dy, hr, mi, se;
     yr = buf[16] + 2000;
@@ -326,22 +329,27 @@ void WeGT02AApp::DecodePVT(const char *buf, int len)
     // latitude
     unsigned int ll; // in 1/500 seconds
     memcpy(&ll, buf+22, 4);
-    m_pvt.lat = double(ll)*5.55555555555556e-07; // double(ll)/500.0/3600.0;
+    ll = ntohl(ll); // network > host
+    m_pvt.lat = double(ll)/1800000; // double(ll)/500.0/3600.0;
     // longitude
     memcpy(&ll, buf+26, 4);
-    m_pvt.lon = double(ll)*5.55555555555556e-07;
-    // velocity
-    m_pvt.v = (unsigned char)(buf[30]);
-    // course of vehicle
+    ll = ntohl(ll); // network > host
+    m_pvt.lon = double(ll)/1800000;
+    // velocity 0-255
+    m_pvt.v = buf[30];
+    // course of vehicle 0-359
     memcpy(&m_pvt.c, buf+31, 2);
+    m_pvt.c = ntohs(m_pvt.c) % 360; // network > host
+    // skip reserved 3 bytes
     // status of this frame
     memcpy(&ll, buf+36, 4);
-    m_pvt.stgps = ll & 0x01;
-    m_pvt.lat = (ll>>1 & 0x01) ? +1*m_pvt.lat : -1*m_pvt.lat;
-    m_pvt.lon = (ll>>2 & 0x01) ? +1*m_pvt.lon : -1*m_pvt.lon;
-    m_pvt.stpow = ll>>3 & 0x01;
-    m_pvt.stsos = ll>>4 & 0x01;
-    m_pvt.strun = ll>>5 & 0x01;
+    ll = ntohl(ll); // network > host
+    m_pvt.stgps = ll & 0x00000001;
+    m_pvt.lat   = ll & 0x00000002 ? +m_pvt.lat : -m_pvt.lat;
+    m_pvt.lon   = ll & 0x00000004 ? +m_pvt.lon : -m_pvt.lon;
+    m_pvt.stpow = ll & 0x00000008;
+    m_pvt.stsos = ll & 0x00000010;
+    m_pvt.strun = ll & 0x00000020;
     // done
     m_pvt.valid = true;
     if (m_logDecoded) {
@@ -355,34 +363,35 @@ void WeGT02AApp::DecodePVT(const char *buf, int len)
                   << "             lat: " << m_pvt.lat << std::endl
                   << "             lon: " << m_pvt.lon << std::endl
                   << "               c: " << m_pvt.c << std::endl
-                  << "               v: " << int(m_pvt.v) << std::endl
-                  << "           stgps: " << int(m_pvt.stgps) << std::endl
-                  << "           stpow: " << int(m_pvt.stpow) << std::endl
-                  << "           stsos: " << int(m_pvt.stsos) << std::endl
-                  << "           strun: " << int(m_pvt.strun) << std::endl;
+                  << "               v: " << (unsigned int)(m_pvt.v) << std::endl
+                  << "           stgps: " << (unsigned int)(m_pvt.stgps) << std::endl
+                  << "           stpow: " << (unsigned int)(m_pvt.stpow) << std::endl
+                  << "           stsos: " << (unsigned int)(m_pvt.stsos) << std::endl
+                  << "           strun: " << (unsigned int)(m_pvt.strun) << std::endl;
     }
 }
 
-void WeGT02AApp::DecodePGG(const char *buf, int len)
+void WeGT02AApp::DecodePGG(const unsigned char *buf, int len)
 {
     // terminal id
-    sprintf(m_pgg.imei, "%x", (unsigned char)buf[5]);
+    sprintf(m_pgg.imei, "%x", buf[5]);
     for (int i=6; i<=12; i++) {
-        sprintf((m_pgg.imei)+2*(i-5)-1, "%02x", (unsigned char)buf[i]);
+        sprintf((m_pgg.imei)+2*(i-5)-1, "%02x", buf[i]);
     }
     m_pgg.imei[15] = 0x00;
     // serail number of data frame
     memcpy(&m_pgg.fsn, buf+13, 2);
+    m_pgg.fsn = ntohs(m_pgg.fsn); // network > host
     // time of this data
     time(&m_pgg.t);
-    // status of power
-    m_pgg.stpow = buf[3];
-    // status of gsm sigal
-    m_pgg.stgsm = buf[4];
-    // status of gps
-    m_pgg.stgps = buf[16];
-    // number of gps satellite
-    m_pgg.nsate = buf[17];
+    // status of power 0-6
+    m_pgg.stpow = buf[3] % 7;
+    // status of gsm sigal 0-4
+    m_pgg.stgsm = buf[4] % 5;
+    // status of gps 0-2
+    m_pgg.stgps = buf[16] % 3;
+    // number of gps satellite 0-12
+    m_pgg.nsate = buf[17] % 13;
     // done
     m_pgg.valid = true;
     if (m_logDecoded) {
@@ -392,10 +401,10 @@ void WeGT02AApp::DecodePGG(const char *buf, int len)
                   << "            imei: " << m_pgg.imei << std::endl
                   << "             fsn: " << m_pgg.fsn << std::endl
                   << "               t: " << m_pgg.t << std::endl
-                  << "           stpow: " << int(m_pgg.stpow) << std::endl
-                  << "           stgsm: " << int(m_pgg.stgsm) << std::endl
-                  << "           stgps: " << int(m_pgg.stgps) << std::endl
-                  << "           nsate: " << int(m_pgg.nsate) << std::endl;
+                  << "           stpow: " << (unsigned int)(m_pgg.stpow) << std::endl
+                  << "           stgsm: " << (unsigned int)(m_pgg.stgsm) << std::endl
+                  << "           stgps: " << (unsigned int)(m_pgg.stgps) << std::endl
+                  << "           nsate: " << (unsigned int)(m_pgg.nsate) << std::endl;
     }
 }
 

@@ -16,10 +16,10 @@ struct gt02apvt_t {
     double          lon;        // longitude in deg
     unsigned short  c;          // course of vehicle in deg
     unsigned char   v;          // velocity in km/h
-    char            stgps;      // status of gps, 0: not ok, 1: ok
-    char            stpow;      // status of power, 0: battery, 1: charging
-    char            stsos;      // status of sos, 0: normal, 1: sos
-    char            strun;      // status of running, 0: normal, 1: power off alarm
+    unsigned char   stgps;      // status of gps, 0: not ok, 1: ok
+    unsigned char   stpow;      // status of power, 0: battery, 1: charging
+    unsigned char   stsos;      // status of sos, 0: normal, 1: sos
+    unsigned char   strun;      // status of running, 0: normal, 1: power off alarm
     bool            valid;
 };
 
@@ -30,10 +30,10 @@ struct gt02apgg_t {
     char            imei[16];   // terminal id
     unsigned short  fsn;        // serial number of frame
     time_t          t;          // local time stamp
-    char            stpow;      // status of power: 0~6
-    char            stgsm;      // status of gsm signal: 0~4
-    char            stgps;      // status of gps, 0: not ok, 1: ok, 2: differential
-    char            nsate;      // number of satellite of this positioning
+    unsigned char   stpow;      // status of power: 0~6
+    unsigned char   stgsm;      // status of gsm signal: 0~4
+    unsigned char   stgps;      // status of gps, 0: not ok, 1: ok, 2: differential
+    unsigned char   nsate;      // number of satellite of this positioning
     bool            valid;
 };
 

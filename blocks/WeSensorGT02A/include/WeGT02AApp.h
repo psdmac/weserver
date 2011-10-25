@@ -47,15 +47,15 @@ private:
     void OnServer(wxSocketEvent& event);
     void OnClient(wxSocketEvent& event);
     void ProcessData(wxSocketBase *pSock);
-    void DecodePVT(const char *buf, int len);
-    void DecodePGG(const char *buf, int len);
+    void DecodePVT(const unsigned char *buf, int len);
+    void DecodePGG(const unsigned char *buf, int len);
     void PushData(bool bPVT = true);
 
 private:
     wxSocketServer *m_pServer;
     std::list<wxSocketBase*> m_lClients;
-    char m_buffer[SOCKET_BUFFER_SIZE];
-    char m_hb[5]; // heartbeat feedback
+    unsigned char m_buffer[SOCKET_BUFFER_SIZE];
+    unsigned char m_hb[5]; // heartbeat feedback
     gt02apvt_t m_pvt;
     gt02apgg_t m_pgg;
     zmq::context_t *m_pZmqCtx;
