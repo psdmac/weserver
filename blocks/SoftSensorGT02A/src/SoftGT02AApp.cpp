@@ -19,6 +19,7 @@
 #include <iostream>
 #include <wx/fileconf.h>
 #include <wx/stdpaths.h>
+#include <netinet/in.h>
 
 IMPLEMENT_APP(SoftGT02AApp);
 
@@ -69,13 +70,16 @@ void SoftGT02AApp::SetBuffer()
     m_pvt[0] = 0x68; m_pvt[1] = 0x68; m_pvt[2] = 0x25; m_pvt[3] = 0; m_pvt[4] = 0;
     m_pvt[5] = 0x03; m_pvt[6] = 0x53; m_pvt[7] = 0x41; m_pvt[8] = 0x90;
     m_pvt[9] = 0x36; m_pvt[10] = 0x59; m_pvt[11] = 0x23; m_pvt[12] = 0x22;
-    unsigned short sn = 12345; memcpy(m_pvt+13, &sn, 2);
+    unsigned short sn = 12345;
+    // host > network
+    sn = htons(sn);
+    memcpy(m_pvt+13, &sn, 2);
     m_pvt[15] = 0x10; m_pvt[16] = 11; m_pvt[17] = 6; m_pvt[18] = 21;
     m_pvt[19] = 21; m_pvt[20] = 15; m_pvt[21] = 56;
     unsigned int xx = (30.12345678*60*30000); memcpy(m_pvt+22, &xx, 4);
     xx = (120.12345678*60*30000); memcpy(m_pvt+26, &xx, 4);
     m_pvt[30] = 110; sn = 90; memcpy(m_pvt+31, &sn, 2);
-    m_pvt[33] = 0; m_pvt[34] = 0; m_pvt[35] = 0; xx = 15; memcpy(m_pvt+36, &xx, 4);
+    m_pvt[33] = 0; m_pvt[34] = 0; m_pvt[35] = 0; xx = htonl(15); memcpy(m_pvt+36, &xx, 4);
     m_pvt[40] = 0x0d; m_pvt[41] = 0x0a;
 
     m_pgg[0] = 0x68; m_pgg[1] = 0x68; m_pgg[2] = 19; m_pgg[3] = 0x06; m_pgg[4] = 0x04;
@@ -113,7 +117,8 @@ bool SoftGT02AApp::CreateClient()
 void SoftGT02AApp::OnTimer(wxTimerEvent& event)
 {
     if (m_pClient != NULL && m_pClient->IsOk()) {
-        memcpy(m_pvt+13, &m_countPVT, 2);
+        unsigned short countpvt = htons(m_countPVT);
+        memcpy(m_pvt+13, &countpvt, 2);
         // datetime
         wxDateTime dt = wxDateTime::Now();
         m_pvt[16] = dt.GetYear() - 2000; m_pvt[17] = dt.GetMonth() + 1;
@@ -124,11 +129,14 @@ void SoftGT02AApp::OnTimer(wxTimerEvent& event)
         int num = rand();
         unsigned int xx;
         xx = ((30.0+(num%1000000)/1000000.0)*60.0*30000.0);
+        xx = htonl(xx);
         memcpy(m_pvt+22, &xx, 4);
         xx = ((120.0+(num%1000000)/1000000.0)*60.0*30000.0);
+        xx = htonl(xx);
         memcpy(m_pvt+26, &xx, 4);
         m_pvt[30] = num % 256;
         unsigned short sn = num % 360;
+        sn = htons(sn);
         memcpy(m_pvt+31, &sn, 2);
 
         m_pClient->Write(m_pvt, sizeof(m_pvt));
@@ -142,7 +150,8 @@ void SoftGT02AApp::OnTimer(wxTimerEvent& event)
             std::cout << std::endl;
         }
         if (m_countPVT%18 == 2) {
-            memcpy(m_pgg+13, &m_countPGG, 2);
+            unsigned short countpgg = htons(m_countPGG);
+            memcpy(m_pgg+13, &countpgg, 2);
             //sleep(1);
             m_pgg[3] = num % 7;
             m_pgg[4] = num % 5;
