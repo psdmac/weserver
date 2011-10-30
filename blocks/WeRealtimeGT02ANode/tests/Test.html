@@ -1,0 +1,46 @@
+<!doctype>
+<html>
+<head>
+<script src='http://localhost/jslib/jquery.min.js'></script>
+<script src="http://localhost:2015/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+var socket = null;
+
+$(function() {
+    $('#log').append('1' + '\n');
+    socket = io.connect('http://localhost:2015');
+    $('#log').append('2' + '\n');
+    socket.on('connect', function () {
+        $('#log').append('connected' + '\n');
+        socket.emit('setimei', '123456789123456');
+        $('#log').append('emit: setimei' + '\n\n');
+    });
+    $('#log').append('3' + '\n');
+    socket.on('disconnect', function () {
+        $('#log').append('disconnected' + '\n'); 
+    });
+    $('#log').append('4' + '\n');
+    socket.on('updatepvt', function (pvt) {
+        var i = '', str = '';
+        for ( i in pvt ) {
+            str += 'pvt.' + i + ': ' + pvt[i] + '\n';
+        }
+        $('#log').append(str + '\n');
+    });
+    $('#log').append('5' + '\n');
+    socket.on('updatepgg', function (pgg) {
+        var i = '', str = '';
+        for ( i in pgg ) {
+            str += 'pgg.' + i + ': ' + pgg[i] + '\n';
+        }
+        $('#log').append(str + '\n');
+    });
+});
+</script>
+</head>
+<body>
+<pre id = 'log'>
+</pre>
+</body>
+</html>
+
