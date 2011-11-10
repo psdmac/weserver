@@ -137,7 +137,7 @@ void TTranslate::PushJSON(const wxString& strJSON)
     size_t len = strJSON.size();
     zmq::message_t msg(len);
     memcpy(msg.data(), strJSON.c_str(), len);
-    if ( !m_pSockPush->send(msg) ) {
+    if ( 0/*!m_pSockPush->send(msg)*/ ) {
         std::cout << time(NULL)
                   << " failed to push message" << std::endl;
     } else if (wxGetApp().m_logJSON != 0) {
