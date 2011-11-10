@@ -1,18 +1,18 @@
 <!doctype>
 <html>
 <head>
-<script src='http://localhost/jslib/jquery.min.js'></script>
-<script src="http://localhost:2015/socket.io/socket.io.js"></script>
+<script src='http://localhost/js/jquery-1.7.min.js'></script>
+<script src="http://localhost/js/io-0.8.7.min.js"></script>
 <script type="text/javascript">
 var socket = null;
 
 $(function() {
     $('#log').append('1' + '\n');
-    socket = io.connect('http://localhost:2015');
+    socket = io.connect('http://localhost:2200');
     $('#log').append('2' + '\n');
     socket.on('connect', function () {
         $('#log').append('connected' + '\n');
-        socket.emit('setimei', '123456789123456');
+        socket.emit('setimei', '353419036592322');
         $('#log').append('emit: setimei' + '\n\n');
     });
     $('#log').append('3' + '\n');

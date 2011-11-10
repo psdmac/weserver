@@ -74,12 +74,14 @@ void SoftGT02AApp::SetBuffer()
     // host > network
     sn = htons(sn);
     memcpy(m_pvt+13, &sn, 2);
-    m_pvt[15] = 0x10; m_pvt[16] = 11; m_pvt[17] = 6; m_pvt[18] = 21;
+    m_pvt[15] = 0x10; 
+    m_pvt[16] = 11; m_pvt[17] = 6; m_pvt[18] = 21;
     m_pvt[19] = 21; m_pvt[20] = 15; m_pvt[21] = 56;
     unsigned int xx = (30.12345678*60*30000); memcpy(m_pvt+22, &xx, 4);
     xx = (120.12345678*60*30000); memcpy(m_pvt+26, &xx, 4);
     m_pvt[30] = 110; sn = 90; memcpy(m_pvt+31, &sn, 2);
-    m_pvt[33] = 0; m_pvt[34] = 0; m_pvt[35] = 0; xx = htonl(15); memcpy(m_pvt+36, &xx, 4);
+    m_pvt[33] = 0; m_pvt[34] = 0; m_pvt[35] = 0; 
+    xx = htonl(15); memcpy(m_pvt+36, &xx, 4);
     m_pvt[40] = 0x0d; m_pvt[41] = 0x0a;
 
     m_pgg[0] = 0x68; m_pgg[1] = 0x68; m_pgg[2] = 19; m_pgg[3] = 0x06; m_pgg[4] = 0x04;
