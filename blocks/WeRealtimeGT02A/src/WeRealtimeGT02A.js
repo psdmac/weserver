@@ -1,8 +1,8 @@
-// WeRealtimeGT02ANode.js is a part of Weiran server suites.
+// WeRealtimeGT02A.js is a part of Weiran server suites.
 // Tian Yantao @ www.weiran.biz
 // V11.07, last update: 2011-11-10
 
-weConfig = require('/usr/local/etc/WeRealtimeGT02ANode.conf');
+weConfig = require('/usr/local/etc/WeRealtimeGT02A.conf');
 util = require('util');
 zmq = require('/usr/local/lib/node_modules/zmq');
 sio = require('/usr/local/lib/node_modules/socket.io');
