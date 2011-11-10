@@ -325,7 +325,7 @@ void WeGT02AApp::DecodePVT(const unsigned char *buf, int len)
     unsigned short nod = wxDateTime::GetNumberOfDays(wxDateTime::Month(mo-1), yr);
     if (dy > nod) dy = nod;
     wxDateTime dt(dy, wxDateTime::Month(mo - 1), yr, hr, mi, se);
-    m_pvt.t = dt.GetTicks();
+    m_pvt.t = (unsigned int)(dt.GetTicks());
     // latitude
     unsigned int ll; // in 1/500 seconds
     memcpy(&ll, buf+22, 4);
@@ -383,7 +383,8 @@ void WeGT02AApp::DecodePGG(const unsigned char *buf, int len)
     memcpy(&m_pgg.fsn, buf+13, 2);
     m_pgg.fsn = ntohs(m_pgg.fsn); // network > host
     // time of this data
-    time(&m_pgg.t);
+    time_t tNow = time(NULL);
+    m_pgg.t = (unsigned int)tNow;
     // status of power 0-6
     m_pgg.stpow = buf[3] % 7;
     // status of gsm sigal 0-4

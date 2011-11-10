@@ -11,7 +11,7 @@ struct gt02apvt_t {
     char            dtype;      // data type
     char            imei[16];   // terminal id
     unsigned short  fsn;        // serial number of frame
-    time_t          t;          // time stamp in s
+    unsigned int    t;          // time stamp in s
     double          lat;        // latitude in deg
     double          lon;        // longitude in deg
     unsigned short  c;          // course of vehicle in deg
@@ -29,7 +29,7 @@ struct gt02apgg_t {
     char            dtype;      // data type
     char            imei[16];   // terminal id
     unsigned short  fsn;        // serial number of frame
-    time_t          t;          // local time stamp
+    unsigned int    t;          // local time stamp
     unsigned char   stpow;      // status of power: 0~6
     unsigned char   stgsm;      // status of gsm signal: 0~4
     unsigned char   stgps;      // status of gps, 0: not ok, 1: ok, 2: differential
