@@ -1,0 +1,45 @@
+<!doctype>
+<html>
+<head>
+<script src='http://localhost/js/jquery-1.7.min.js'></script>
+<script src='http://localhost/js/io-0.8.7.min.js'></script>
+<script type="text/javascript">
+function test(host) {
+    var socket = io.connect(host,{
+        //'force new connection': true,
+        //'reconnect': false
+    });
+    
+    socket.on('connect', function () {
+        $('#log').append('connected' + '\n');
+        socket.emit('signin', 'tianyantao', $.md5('tianyantao'));
+        $('#log').append('emit: signin' + ' tianyantao ' + $.md5('tianyantao') + '\n\n');
+    });
+    
+    socket.on('disconnect', function () {
+        $('#log').append('disconnected' + '\n'); 
+    });
+    
+    socket.on('access', function (user) {
+        var str = 'access\n';
+        str += JSON.stringify(user);
+        $('#log').append(str + '\n');
+    });
+    
+    socket.on('error', function (err) {
+        $('#log').append(err + '\n');
+    });
+}
+$(function() {
+    //setInterval(function () {
+        test('http://localhost:2080');
+    //}, 100000);
+});
+</script>
+</head>
+<body>
+<pre id = 'log'>
+</pre>
+</body>
+</html>
+

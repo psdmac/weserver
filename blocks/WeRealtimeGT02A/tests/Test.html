@@ -8,12 +8,12 @@ var socket = null;
 
 $(function() {
     $('#log').append('1' + '\n');
-    socket = io.connect('http://localhost:2200');
+    socket = io.connect('http://fanghuanweiran.com:2200');
     $('#log').append('2' + '\n');
     socket.on('connect', function () {
         $('#log').append('connected' + '\n');
         socket.emit('setimei', '353419036592322');
-        $('#log').append('emit: setimei' + '\n\n');
+        $('#log').append('emit: setimei 353419036592322' + '\n\n');
     });
     $('#log').append('3' + '\n');
     socket.on('disconnect', function () {
