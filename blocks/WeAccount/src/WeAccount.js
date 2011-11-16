@@ -35,7 +35,7 @@ util.log('listen port: ' + weConfig.wsport);
 // configuration for web socket server
 sio.enable('browser client minification');  // send minified client
 sio.enable('browser client etag');          // apply etag caching logic based on version number
-sio.set('log level', 1);                    // reduce logging
+sio.set('log level', 2);                    // reduce logging
 sio.set('transports', [                     // enable all transports (optional if you want flashsocket)
     'websocket', 
     'flashsocket', 
@@ -44,8 +44,40 @@ sio.set('transports', [                     // enable all transports (optional i
     'jsonp-polling'
 ]);
 
+// map of socket id and client position
+mapSockIdPos = {};
+// map of account email and socket id
+mapEmailSockId = {};
+
 // web socket event handlers
 sio.sockets.on('connection', function (socket) {
+    // broadcast to all cients that I'm online
+    socket.broadcast.emit('clientonline', socket.id);
+    util.log('broadcast online of ' + socket.id);
+    
+    // send all client positions to this socket
+    socket.emit('clientspos', mapSockIdPos);
+    util.log('emit clientspos to ' + socket.id);
+    
+    // disconnect event handler
+    socket.on('disconnect', function () {
+        // remove item from socket-pos map
+        if ( mapSockIdPos[socket.id]) {
+            delete mapSockIdPos[socket.id];
+            util.log('del < mapSockIdPos.' + socket.id);
+        }
+        // remove item from email-socket map if exists
+        if ( socket.email && mapEmailSockId[socket.email] ) {
+            delete mapEmailSockId[socket.email];
+            socket.email = null;
+            util.log('del < mapEmailSockId.' + socket.email);
+        }
+        
+        // broadcast to all clients that I'm offline
+        socket.broadcast.emit('clientoffline', socket.id);
+        util.log('broadcast offline of ' + socket.id);
+    });
+    
     // sign in event handler
     socket.on('signin', function (email, passwd) {
         // email is the email address of user who are trying to sign in
@@ -76,13 +108,24 @@ sio.sockets.on('connection', function (socket) {
                     name: rows[0]['name']
                 }
                 socket.emit('access', user);
+                // set a email property to find socket by email
+                socket.email = email;
+                mapEmailSockId[email] = socket.id;
             }
         });
     }); // end of signin event
     
-    // update user position
-    socket.on('updatepos', function(email, pos) {
-        if (typeof pos !== 'object') {
+    // update clients position
+    socket.on('updatepos', function(pos) {
+        util.log('on updatepos of ' + socket.id);
+        if (typeof pos === 'object' && typeof pos.longitude !== 'undefined') {
+            mapSockIdPos[socket.id] = pos;
+        }
+        // broadcast this update to other clients
+        socket.broadcast.emit('clientnewpos', socket.id, pos);
+        util.log('broadcast new pos of ' + socket.id);
+        
+        /*if (typeof pos !== 'object') {
             socket.emit('error', 'Invalid position data');
             return;
         }
@@ -100,7 +143,7 @@ sio.sockets.on('connection', function (socket) {
                 util.log('error: ' + err);
                 return;
             }
-        });
+        });*/
     });
     
     // register event
@@ -128,10 +171,5 @@ sio.sockets.on('connection', function (socket) {
     
     // update account info
     socket.on('update', function(account) {
-    }),
-    
-    // disconnect event handler
-    socket.on('disconnect', function () {
     });
 });
-
