@@ -53,29 +53,34 @@ mapEmailSockId = {};
 sio.sockets.on('connection', function (socket) {
     // broadcast to all cients that I'm online
     socket.broadcast.emit('clientonline', socket.id);
-    util.log('broadcast online of ' + socket.id);
+    //util.log('broadcast online of ' + socket.id);
     
     // send all client positions to this socket
     socket.emit('clientspos', mapSockIdPos);
-    util.log('emit clientspos to ' + socket.id);
+    //util.log('emit clientspos to ' + socket.id);
     
     // disconnect event handler
     socket.on('disconnect', function () {
         // remove item from socket-pos map
         if ( mapSockIdPos[socket.id]) {
             delete mapSockIdPos[socket.id];
-            util.log('del < mapSockIdPos.' + socket.id);
+            //util.log('del < mapSockIdPos.' + socket.id);
         }
         // remove item from email-socket map if exists
         if ( socket.email && mapEmailSockId[socket.email] ) {
             delete mapEmailSockId[socket.email];
             socket.email = null;
-            util.log('del < mapEmailSockId.' + socket.email);
+            //util.log('del < mapEmailSockId.' + socket.email);
         }
         
         // broadcast to all clients that I'm offline
         socket.broadcast.emit('clientoffline', socket.id);
-        util.log('broadcast offline of ' + socket.id);
+        //util.log('broadcast offline of ' + socket.id);
+    });
+    
+    // broadcast message to all clients
+    socket.on('broadcastmsg', function(msg) {
+        socket.broadcast.emit('broadcastmsg', socket.id, msg);
     });
     
     // sign in event handler
@@ -117,13 +122,13 @@ sio.sockets.on('connection', function (socket) {
     
     // update clients position
     socket.on('updatepos', function(pos) {
-        util.log('on updatepos of ' + socket.id);
+        //util.log('on updatepos of ' + socket.id);
         if (typeof pos === 'object' && typeof pos.longitude !== 'undefined') {
             mapSockIdPos[socket.id] = pos;
         }
         // broadcast this update to other clients
         socket.broadcast.emit('clientnewpos', socket.id, pos);
-        util.log('broadcast new pos of ' + socket.id);
+        //util.log('broadcast new pos of ' + socket.id);
         
         /*if (typeof pos !== 'object') {
             socket.emit('error', 'Invalid position data');
