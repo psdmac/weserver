@@ -1,0 +1,12 @@
+{
+    "name": "Weiran",
+    "version": "0.1",
+    "main": "./app.js",
+    "private": true,
+    "dependencies": {
+        "socket.io": "0.9.2",
+        "eventproxy": "0.1.1",
+        "mongodb": "0.9.9-7",
+        "nodemailer": "0.3.9"
+    }
+}

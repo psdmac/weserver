@@ -4,16 +4,17 @@
 <script src='http://localhost/js/jquery-1.7.min.js'></script>
 <script src='http://localhost/js/io-0.8.7.min.js'></script>
 <script type="text/javascript">
+var socket;
 function test(host) {
-    var socket = io.connect(host,{
+    socket = io.connect(host,{
         //'force new connection': true,
         //'reconnect': false
     });
     
     socket.on('connect', function () {
         $('#log').append('connected' + '\n');
-        socket.emit('signin', 'tianyantao', $.md5('tianyantao'));
-        $('#log').append('emit: signin' + ' tianyantao ' + $.md5('tianyantao') + '\n\n');
+        //socket.emit('signin', 'tianyantao', $.md5('tianyantao'));
+        //$('#log').append('emit: signin' + ' tianyantao ' + $.md5('tianyantao') + '\n\n');
     });
     
     socket.on('disconnect', function () {
@@ -32,7 +33,7 @@ function test(host) {
 }
 $(function() {
     //setInterval(function () {
-        test('http://localhost:2080');
+        test('http://www.fanghuanweiran.com:2080');
     //}, 100000);
 });
 </script>
