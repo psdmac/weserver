@@ -1,12 +1,15 @@
-var io = require('socket.io');
+var io = require('socket.io'),
+    route = require('./route'),
+    config = require('./config').config;
 
-io = io.listen(2080);
+var app = io.listen(config.port);
 
 // configuration for web socket server
-io.enable('browser client minification');  // send minified client
-io.enable('browser client etag');          // apply etag caching logic based on version number
-io.set('log level', 0);                    // reduce logging
-io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+app.enable('browser client minification');  // send minified client
+app.enable('browser client etag');          // apply etag caching logic based on version number
+app.enable('browser client gzip');          // gzip for file
+app.set('log level', 3);                    // reduce logging
+app.set('transports', [                     // enable all transports (optional if you want flashsocket)
     'websocket', 
     'flashsocket', 
     'htmlfile', 
@@ -14,6 +17,13 @@ io.set('transports', [                     // enable all transports (optional if
     'jsonp-polling'
 ]);
 
-io.sockets.on('connection', function(socket) {
-    console.log('on connection');
+app.sockets.on('connection', function(socket) {
+    route.onConnect(socket);
+    // socket events
+    socket.on('disconnect', function(){route.onDisconnect(socket);});
+    socket.on('message', function(msg){route.onMessage(socket, msg);});
+    socket.on('wedata', function(data){route.onWeData(socket, data);});
 });
+
+console.log("Weiran listening on port %d", app.server.address().port);
+console.log("God bless love....");
