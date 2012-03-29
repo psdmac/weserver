@@ -1,5 +1,6 @@
 // data event handlers
 
+// websocket router
 var router = {};
 var account = require('./lib/account');
 router['accountsignin'] = account.signin;
@@ -28,3 +29,5 @@ exports.onMessage = function(socket, msg) {
     //console.log('on message: socket id is ' + socket.id + ', message is ' + msg);
 };
 
+// http router
+exports.activateAccount = account.activateAccount;

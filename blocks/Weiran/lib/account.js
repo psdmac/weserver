@@ -1,5 +1,7 @@
 var Account = require('../model').Account,
-    md5 = require('./md5').md5;
+    md5 = require('./md5').md5,
+    mailer = require('./mail'),
+    config = require('../config').config;
 
 exports.signin = function(socket, data) {
     var feedback = {
@@ -10,35 +12,21 @@ exports.signin = function(socket, data) {
     // processing
     socket.emit('wedata', feedback);
     
-    db.collection('account', function(err, collection) {
-        // db error
-        if (err) {
-            console.log('db error: ' + err.message);
+    Account.findOne({user: data.user}, function(err, account) {
+        if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
-            return;
-        }
-        collection.findOne({user: data.user, pswd: data.pswd}, function(err, doc) {
-            // db error
-            if (err) {
-                console.log('db error: ' + err.message);
-                feedback.status = 2;
-                socket.emit('wedata', feedback);
-                return;
-            }
-            
-            // not found
-            if (!doc || doc.length<1) {
-                feedback.status = 3;
-                socket.emit('wedata', feedback);
-                return;
-            }
-            
-            // ok
-            feedback.account = doc;
+            console.log('db error: ' + JSON.stringify(err));
+        } else if(!account) { // not found
+            feedback.status = 2;
+        } else if (data.pswd !== account.pswd) {
+            feedback.status = 3;
+        } else if (!account.active) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
-        });
+        } else { // ok
+            feedback.account = account;
+            feedback.status = 5;
+        }
+        socket.emit('wedata', feedback);
     });
 };
 
@@ -55,16 +43,16 @@ exports.create = function(socket, data) {
     // processing
     socket.emit('wedata', feedback);
     
-    Account.find({'$or':[{'user': data.user}, {'email':data.email}]}, function(err, accouts) {
+    Account.find({'$or': [{user: data.user}, {email: data.email}]}, function(err, accounts) {
         if(err) { // db error
-            console.log('db error: ' + err.message);
             feedback.status = 1;
             socket.emit('wedata', feedback);
+            console.log('db error: ' + JSON.stringify(err));
             return;
         }
-        if(users.length > 0) {
+        if(accounts && accounts.length > 0) {
             // user / email using
-            feedback.status = 1;
+            feedback.status = 2;
             socket.emit('wedata', feedback);
             return;
         }
@@ -80,46 +68,30 @@ exports.create = function(socket, data) {
         
         account.save(function(err) {
             if (err) { // db error
-                feedback.status = 2;
+                feedback.status = 3;
                 socket.emit('wedata', feedback);
+                console.log('db error: ' + JSON.stringify(err));
                 return;
             }
             // send a mail
-        });
-    });
-    
-    db.collection('account', function(err, collection) {
-        // db error
-        if (err) {
-            console.log('db error: ' + err.message);
-            feedback.status = 1;
-            socket.emit('wedata', feedback);
-            return;
-        }
-        collection.findOne({user: data.user, pswd: data.pswd}, function(err, doc) {
-            // db error
-            if (err) {
-                console.log('db error: ' + err.message);
-                feedback.status = 2;
+            var token = md5(data.user + data.email, config.key);
+            mailer.sendActivateMail(data.email, data.user, token, function(err, res) {
+                if (err) { // mailer error
+                    feedback.status = 4;
+                    console.log('mailer error: ' + JSON.stringify(err));
+                } else { // ok
+                    feedback.status = 5;
+                }
                 socket.emit('wedata', feedback);
-                return;
-            }
-            
-            // not found
-            if (!doc || doc.length<1) {
-                feedback.status = 3;
-                socket.emit('wedata', feedback);
-                return;
-            }
-            
-            // ok
-            feedback.account = doc;
-            feedback.status = 4;
-            socket.emit('wedata', feedback);
+            });
         });
     });
 };
 
 exports.update = function(socket, data) {
     console.log('account.update');
+};
+
+exports.activateAccount = function(req, res) {
+    res.send('activate');
 };

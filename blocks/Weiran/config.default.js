@@ -1,24 +1,17 @@
 exports.config = {
-    // weiran
-	name: 'Weiran',
-	version: '0.0.1',
-	description: 'Weiran websocket server',
+    // service
+	port: 80,
+	name: 'fanghuanweiran.com',
 	host: 'http://127.0.0.1',
-	session_secret: 'fanghuanyuweiran',
-	auth_cookie_name: 'fanghuanyuweiran',
-	port: 2080,
+	key: 'fanghuanyuweiran',
 	
 	// database
-	db_host: 'localhost',
-	db_port: 27017,
-	db_name: 'weiran',
+	db: 'mongodb://127.0.0.1/weiran',
 
-	// mail SMTP
-	mail_port: 25,
-	mail_user: 'weiran',
-	mail_pass: 'weiran',
-	mail_host: 'smtp.126.com',
-	mail_sender: 'club@126.com',
-	mail_use_authentication: true
+	// mail
+	mail_service: 'Gmail',
+	mail_user: 'example@gmail.com',
+	mail_password: 'password',
+	mail_sender: 'example@gmail.com'
 };
 
