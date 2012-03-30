@@ -31,3 +31,4 @@ exports.onMessage = function(socket, msg) {
 
 // http router
 exports.activateAccount = account.activateAccount;
+exports.resetPassword = account.resetPassword;

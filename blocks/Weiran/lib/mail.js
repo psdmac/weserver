@@ -10,18 +10,31 @@ var transport = mailer.createTransport('SMTP', {
 });
 
 function sendMail(data, callback){
-	transport.sendMail(data,function(err, res){
-		return callback(err, res);
+	transport.sendMail(data,function(error, response) {
+		return callback(error, response);
 	});
 }
 
-function sendActivateMail(email, user, token, callback){
-	var subject = config.name + '社区帐号激活';
-	var html = '<p>您好：<p/>' +
-			   '<p>我们收到您在' + config.name + '社区的注册信息，请点击下面的链接来激活帐户：</p>' +
-			   '<a href="' + config.host + '/active_account?key=' + token + '&user=' + user + '&email=' + email + '">激活链接</a>' +
-			   '<p>若您没有在' + config.name + '社区填写过注册信息，说明有人滥用了您的电子邮箱，请删除此邮件，我们对给您造成的打扰感到抱歉。</p>' +
-			   '<p>' +config.name +'社区 谨上。</p>'
+function sendActivateMail(email, user, token, lang, callback) {
+    var subject = '', html = '',
+        url = config.host + '/activate/account?key=' + token + '&email=' + email + '&user=' + user + '&language=' + lang;
+    if (lang === 'zh-CN') {
+        subject = config.name + ' - 需要激活帐号';
+        html = '<p>感谢您注册<a href=http://www.fanghuanweiran.com>' + config.name + '</a>帐号。<br />' +
+               '您的帐号已经生成，但需要激活后才可使用。</p>' +
+               '<p>请点击下面的链接进行激活：</p>' +
+               '<p><a href=' + url + '>' + url + '</a></p>' +
+               '<p>祝您一切顺利！</p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a> 谨上。</p>';
+    } else { // default 'en'
+        subject = config.name + ' - Account Activation Required';
+        html = '<p>Thank you for registering for an <a href=http://www.fanghuanweiran.com>' + config.name + '</a> account.<br />' +
+               'Your account is almost ready for use, but first it has to be activated.</p>' + 
+               '<p>Please activate your account now by clicking the link below.</p>' +
+               '<p><a href=' + url + '>' + url + '</a></p>' +
+               '<p>Best Regards, </p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
+    }
 
 	var data = {
 		to: email,
@@ -30,18 +43,59 @@ function sendActivateMail(email, user, token, callback){
 		html: html
 	}
 
-	sendMail(data, function(err, res){
-		return callback(err, res);
+	sendMail(data, function(error, response) {
+		return callback(error, response);
 	});
 }
 
-function sendUpdateMail(email, user, callback){
-	var subject = config.name + '社区密码重置';
-	var html = '<p>您好：<p/>' +
-			   '<p>我们收到您在' + config.name + '社区重置密码的请求，请单击下面的链接来重置密码：</p>' +
-			   '<a href="' + config.host + '/reset_pass?' + '&user=' + user + '&email=' + email + '">重置密码链接</a>' +
-			   '<p>若您没有在' + config.name + '社区填写过注册信息，说明有人滥用了您的电子邮箱，请删除此邮件，我们对给您造成的打扰感到抱歉。</p>' +
-			   '<p>' + config.name +'社区 谨上。</p>'
+function sendForgetMail(email, user, token, lang, callback) {
+    var subject = '', html = '',
+        url = config.host + '/reset/password?key=' + token + '&email=' + email + '&user=' + user + '&language=' + lang;
+    if (lang === 'zh-CN') {
+        subject = config.name + ' - 重设帐号密码';
+        html = '<p>感谢您使用<a href=http://www.fanghuanweiran.com>' + config.name + '</a>提供的服务。</p>' +
+               '<p>如果您确实忘记了帐号密码，请点击下面的链接进行重置：</p>' +
+               '<p><a href=' + url + '>' + url + '</a></p>' +
+               '<p>祝您一切顺利！</p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a> 谨上。</p>';
+    } else { // default 'en'
+        subject = config.name + ' - Reset Password';
+        html = '<p>Thank you for using <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
+               '<p>If the password of your account is missing, it can be reset by clicking the link below.</p>' +
+               '<p><a href=' + url + '>' + url + '</a></p>' +
+               '<p>Best Regards, </p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
+    }
+    
+    var data = {
+        to: email,
+        sender: config.mail_sender,
+        subject: subject,
+        html: html
+    }
+    
+    sendMail(data, function(error, response) {
+        return callback(error, response);
+    });
+}
+
+function sendUpdateMail(email, user, lang, callback) {
+    var subject = '', html = '';
+    if (lang === 'zh-CN') {
+        subject = config.name + ' - 帐号信息更新';
+        html = '<p>感谢您注册<a href=http://www.fanghuanweiran.com>' + config.name + '</a>帐号。<br />' +
+               '您的帐号已经生成，但需要激活后才可使用。</p>' +
+               '<p>请点击下面的链接来激活帐户：</p>' +
+               '<p>祝您一切顺利！</p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a> 谨上。</p>';
+    } else { // default 'en'
+        subject = config.name + ' - Account Infomation Updated';
+        html = '<p>Thank you for registering for an <a href=http://www.fanghuanweiran.com>' + config.name + '</a> account.<br />' +
+               'Your account is almost ready for use, but first it has to be activated.</p>' + 
+               '<p>Please activate your account now by clicking the link below.</p>' +
+               '<p>Best Regards, </p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
+    }
 
 	var data = {
 		to: email,
@@ -50,10 +104,11 @@ function sendUpdateMail(email, user, callback){
 		html: html
 	}
 
-    sendMail(data, function(err, res){
-        return callback(err, res);	
+    sendMail(data, function(error, response) {
+        return callback(error, response);	
 	});
 }
 
 exports.sendActivateMail = sendActivateMail;
+exports.sendForgetMail = sendForgetMail;
 exports.sendUpdateMail = sendUpdateMail;

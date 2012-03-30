@@ -30,6 +30,7 @@ ws.sockets.on('connection', function(socket) {
 
 // router for http
 http.get('/activate/account', route.activateAccount);
+http.get('/reset/password', route.resetPassword);
 
 http.listen(config.port);
 console.log("Weiran listening on port %d", ws.server.address().port);
