@@ -31,6 +31,7 @@ exports.signin = function(socket, data) {
                 lonlat: account.lonlat,
                 apps: account.apps,
                 devices: account.devices,
+                layers: account.layers,
                 features: account.features
             };
             feedback.status = 5;
@@ -51,27 +52,47 @@ exports.forget = function(socket, data) {
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
+            socket.emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
-        } else if(!account) { // not found
-            feedback.status = 2;
-        } else if (data.pswd !== account.pswd) {
-            feedback.status = 3;
-        } else if (!account.active) {
-            feedback.status = 4;
-        } else { // ok
-            feedback.account = {
-                user: account.user,
-                pswd: account.pswd,
-                email: account.email,
-                avatar: account.avatar,
-                lonlat: account.lonlat,
-                apps: account.apps,
-                devices: account.devices,
-                features: account.features
-            };
-            feedback.status = 5;
+            return;
         }
-        socket.emit('wedata', feedback);
+        if(!account) { // not found
+            feedback.status = 2;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (data.email !== account.email) {
+            feedback.status = 3;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (!account.active) {
+            feedback.status = 4;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        
+        // ok, send a mail to reset password
+        var token = md5(data.user + data.email, config.key);
+        mailer.sendForgetMail(data.email, data.user, token, data.lang, function(err, res) {
+            if (err) { // mailer error
+                feedback.status = 5;
+                socket.emit('wedata', feedback);
+                console.log('mailer error: ' + JSON.stringify(err));
+                return;
+            }
+            
+            // make sure the password is reset once by the mail
+            account.pswd_reset = false;
+            account.save(function(err) {
+                if (err) { // db error
+                    feedback.status = 6;
+                } else { // ok
+                    feedback.status = 7;
+                }
+                socket.emit('wedata', feedback);
+            });
+        });
     });
 };
 
@@ -134,10 +155,11 @@ exports.update = function(socket, data) {
 };
 
 exports.activateAccount = function(req, res) {
-    var key = req.query.key || '',
-	    user = req.query.user || '',
-	    email = req.query.email || '',
-	    lang = req.query.language || 'en';
+    var user = req.query.user,
+	    email = req.query.email,
+	    lang = req.query.lang,
+	    key = req.query.key,
+	    time = req.query.time;
 	
 	Account.findOne({user: user}, function(err, account) {
         if (err || !account || md5(user+email, config.key) !== key) {
@@ -177,13 +199,14 @@ exports.activateAccount = function(req, res) {
 };
 
 exports.resetPassword = function(req, res) {
-    var key = req.query.key || '',
-	    user = req.query.user || '',
-	    email = req.query.email || '',
-	    lang = req.query.language || 'en';
+    var user = req.query.user,
+	    email = req.query.email,
+	    lang = req.query.lang,
+	    key = req.query.key,
+	    time = req.query.time;
 	
 	Account.findOne({user: user}, function(err, account) {
-        if (err || !account || md5(user+email, config.key) !== key) { // db error
+        if (err || !account || account.pswd_reset || md5(user+email, config.key) !== key) {
             if (lang == 'zh-CN') {
                 res.send('链接已失效');
             } else { // default 'en'
@@ -200,8 +223,10 @@ exports.resetPassword = function(req, res) {
             return;
         }
         
+        // make sure the password is reset once by the mail
         var pswd = md5(new Date(), user).slice(0, 10);
         account.pswd = md5(pswd);
+        account.pswd_reset = true;
         account.save(function(err) {
             if (err) {
                 if (lang == 'zh-CN') {
@@ -211,9 +236,10 @@ exports.resetPassword = function(req, res) {
                 }
             } else {
                 if (lang == 'zh-CN') {
-                    res.send('恭喜，您的新密码是：' + pswd);
+                    res.send('恭喜，您的新密码是：' + pswd + '。为安全起见，我们强烈建议您发上登录系统并修改此密码。');
                 } else { // default 'en'
-                    res.send('Success, your new password is: ' + pswd);
+                    res.send('Success, your new password is: ' + pswd +
+                    '. For security, we strongly suggest you signing in to system to change the password immediately.');
                 }
             }
         });
