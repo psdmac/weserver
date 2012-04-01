@@ -15,28 +15,50 @@ exports.signin = function(socket, data) {
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
+            socket.emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
-        } else if(!account) { // not found
-            feedback.status = 2;
-        } else if (data.pswd !== account.pswd) {
-            feedback.status = 3;
-        } else if (!account.active) {
-            feedback.status = 4;
-        } else { // ok
-            feedback.account = {
-                user: account.user,
-                pswd: account.pswd,
-                email: account.email,
-                avatar: account.avatar,
-                lonlat: account.lonlat,
-                apps: account.apps,
-                devices: account.devices,
-                layers: account.layers,
-                features: account.features
-            };
-            feedback.status = 5;
+            return;
         }
-        socket.emit('wedata', feedback);
+        if(!account) { // not found
+            feedback.status = 2;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (data.pswd !== account.pswd) {
+            feedback.status = 3;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (!account.active) {
+            feedback.status = 4;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        // create a token for session
+        var time = new Date();
+        var token = md5(account.pswd + time.toISOString(), config.key);
+        account.signin_at = time;
+        account.signin_count += 1;
+        account.token = token;
+        account.save(function(err) {
+            if (err) { // db error
+                feedback.status = 5;
+            } else { // ok
+                feedback.status = 6;
+                feedback.account = {
+                    user: account.user,
+                    email: account.email,
+                    token: account.token,
+                    //avatar: account.avatar,
+                    //lonlat: account.lonlat,
+                    //apps: account.apps,
+                    //devices: account.devices,
+                    layers: account.layers,
+                    features: account.features
+                };
+            }
+            socket.emit('wedata', feedback);
+        });
     });
 };
 
@@ -151,7 +173,61 @@ exports.create = function(socket, data) {
 };
 
 exports.update = function(socket, data) {
-    console.log('account.update');
+    var feedback = {
+        type: data.type,
+        status: 0
+    };
+
+    // processing
+    socket.emit('wedata', feedback);
+    
+    Account.findOne({user: data.user}, function(err, account) {
+        if (err) { // db error
+            feedback.status = 1;
+            socket.emit('wedata', feedback);
+            console.log('db error: ' + JSON.stringify(err));
+            return;
+        }
+        if(!account) { // not found
+            feedback.status = 2;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (!account.active) {
+            feedback.status = 3;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (data.token !== account.token) {
+            feedback.status = 4;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        
+        // ok, update account data
+        if (data.pswd && data.pswd !== account.pswd) {
+            account.pswd = data.pswd;
+        }
+        if (data.email && data.email !== account.email) {
+            account.email = data.email;
+        }
+        account.update_at = new Date();
+        account.save(function(err) {
+            if (err) { // db error
+                feedback.status = 5;
+                console.log('db error: ' + JSON.stringify(err));
+            } else {
+                feedback.status = 6;
+            }
+            socket.emit('wedata', feedback);
+        });
+        // send a notification mail
+        mailer.sendUpdateMail(data.email, data.user, data.lang, function(err, res) {
+            if (err) { // mailer error
+                console.log('mailer error: ' + JSON.stringify(err));
+            }
+        });
+    });
 };
 
 exports.activateAccount = function(req, res) {
@@ -172,7 +248,7 @@ exports.activateAccount = function(req, res) {
         }
         if(account.active) {
             if (lang == 'zh-CN') {
-                res.send('该账号已经被激活。');
+                res.send('该用户已经被激活。');
             } else { // default 'en'
                 res.send('This account is already activated.');
             }
@@ -180,16 +256,17 @@ exports.activateAccount = function(req, res) {
         }
         
         account.active = true;
+        account.update_at = new Date();
         account.save(function(err) {
             if (err) {
                 if (lang == 'zh-CN') {
-                    res.send('非常抱歉，系统无法激活该账号。');
+                    res.send('非常抱歉，系统无法激活该用户。');
                 } else { // default 'en'
                     res.send('Sorry, this account could not be activated.');
                 }
             } else {
                 if (lang == 'zh-CN') {
-                    res.send('恭喜，您现在可以使用该帐号登录系统了。');
+                    res.send('恭喜，您现在可以使用该用户登录系统了。');
                 } else { // default 'en'
                     res.send('Success, now you can sign in to system with this account.');
                 }
@@ -216,7 +293,7 @@ exports.resetPassword = function(req, res) {
         }
         if(!account.active) {
             if (lang == 'zh-CN') {
-                res.send('该账号还没有被激活。');
+                res.send('该用户还没有被激活。');
             } else { // default 'en'
                 res.send('This account has not been activated yet.');
             }
@@ -227,16 +304,17 @@ exports.resetPassword = function(req, res) {
         var pswd = md5(new Date(), user).slice(0, 10);
         account.pswd = md5(pswd);
         account.pswd_reset = true;
+        account.update_at = new Date();
         account.save(function(err) {
             if (err) {
                 if (lang == 'zh-CN') {
-                    res.send('非常抱歉，系统无法重置该账号的密码。');
+                    res.send('非常抱歉，系统无法重置该用户的密码。');
                 } else { // default 'en'
                     res.send('Sorry, the password of this account could not be reset.');
                 }
             } else {
                 if (lang == 'zh-CN') {
-                    res.send('恭喜，您的新密码是：' + pswd + '。为安全起见，我们强烈建议您发上登录系统并修改此密码。');
+                    res.send('恭喜，您的新密码是：' + pswd + '。为安全起见，我们强烈建议您马上登录系统并修改密码。');
                 } else { // default 'en'
                     res.send('Success, your new password is: ' + pswd +
                     '. For security, we strongly suggest you signing in to system to change the password immediately.');
