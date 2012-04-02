@@ -4,7 +4,7 @@ exports.config = {
 	port: 2080,
 	name: 'fanghuanweiran.com',
 	key: 'fanghuanyuweiran',
-	origins: '*',
+	origins: '*:*',
 	
 	// database
 	db: 'mongodb://127.0.0.1:27017/weiran',
