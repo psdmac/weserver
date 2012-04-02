@@ -49,10 +49,8 @@ exports.signin = function(socket, data) {
                     user: account.user,
                     email: account.email,
                     token: account.token,
-                    //avatar: account.avatar,
-                    //lonlat: account.lonlat,
-                    //apps: account.apps,
-                    //devices: account.devices,
+                    apps: account.apps,
+                    devices: account.devices,
                     layers: account.layers,
                     features: account.features
                 };
@@ -141,14 +139,11 @@ exports.create = function(socket, data) {
             return;
         }
         
-        // create gavatar
-        var avatar_url = 'http://www.gravatar.com/avatar/' + md5(data.email) + '?size=32';
         var account = new Account();
         account.user = data.user;
         account.pswd = data.pswd;
         account.email = data.email;
         account.active = false;
-        account.avatar = avatar_url;
         
         account.save(function(err) {
             if (err) { // db error
@@ -204,13 +199,8 @@ exports.update = function(socket, data) {
             return;
         }
         
-        // ok, update account data
-        if (data.pswd && data.pswd !== account.pswd) {
-            account.pswd = data.pswd;
-        }
-        if (data.email && data.email !== account.email) {
-            account.email = data.email;
-        }
+        // ok, update password
+        account.pswd = data.pswd;
         account.update_at = new Date();
         account.save(function(err) {
             if (err) { // db error
@@ -222,7 +212,7 @@ exports.update = function(socket, data) {
             socket.emit('wedata', feedback);
         });
         // send a notification mail
-        mailer.sendUpdateMail(data.email, data.user, data.lang, function(err, res) {
+        mailer.sendUpdateMail(account.email, data.user, data.lang, function(err, res) {
             if (err) { // mailer error
                 console.log('mailer error: ' + JSON.stringify(err));
             }
@@ -314,10 +304,10 @@ exports.resetPassword = function(req, res) {
                 }
             } else {
                 if (lang == 'zh-CN') {
-                    res.send('恭喜，您的新密码是：' + pswd + '。为安全起见，我们强烈建议您马上登录系统并修改密码。');
+                    res.send('恭喜，您的新密码是：' + pswd + '。为安全起见，我们强烈建议您马上登录系统并设置一个新密码。');
                 } else { // default 'en'
                     res.send('Success, your new password is: ' + pswd +
-                    '. For security, we strongly suggest you signing in to system to change the password immediately.');
+                    '. For security, we strongly suggest you signing in to system to set a new password immediately.');
                 }
             }
         });

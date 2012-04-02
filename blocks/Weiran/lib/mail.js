@@ -90,17 +90,17 @@ function sendForgetMail(email, user, token, lang, callback) {
 function sendUpdateMail(email, user, lang, callback) {
     var subject = '', html = '';
     if (lang === 'zh-CN') {
-        subject = config.name + ' - 用户信息更新';
+        subject = config.name + ' - 密码更新通知';
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
-               '<p>您的用户注册信息已经更新。</p>' +
+               '<p>您的登录密码已经更新。</p>' +
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a></p>';
     } else { // default 'en'
-        subject = config.name + ' - Account Update Notification';
+        subject = config.name + ' - Password Update Notification';
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
-               '<p>Your account infomation has been updated.</p>' +
+               '<p>Your password has been updated.</p>' +
                '<p>Best Regards, </p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
     }
