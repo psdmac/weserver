@@ -11,6 +11,7 @@ ws.enable('browser client minification');  // send minified client
 ws.enable('browser client etag');          // apply etag caching logic based on version number
 ws.enable('browser client gzip');          // gzip for file
 ws.set('log level', 3);                    // reduce logging
+ws.set('origins', config.origins);
 ws.set('transports', [                     // enable all transports (optional if you want flashsocket)
     'websocket', 
     'flashsocket', 
