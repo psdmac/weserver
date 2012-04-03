@@ -21,7 +21,7 @@ function sendActivateMail(email, user, token, lang, callback) {
               'user=' + user + '&amp;email=' + email + '&amp;lang=' + lang +
               '&amp;key=' + token + '&amp;time=' + time.getTime();
     if (lang === 'zh-CN') {
-        subject = config.name + ' - 需要激活用户';
+        subject = '需要激活用户 - ' + config.name;
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您注册 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 用户。<br />' +
                '您的用户已经生成，但需要激活后才可以使用。</p>' +
@@ -30,7 +30,7 @@ function sendActivateMail(email, user, token, lang, callback) {
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a></p>';
     } else { // default 'en'
-        subject = config.name + ' - Account Activation Required';
+        subject = 'Account Activation Required - ' + config.name;
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for registering for an account of <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.<br />' +
                'Your account is almost ready for use, but first it has to be activated.</p>' + 
@@ -58,7 +58,7 @@ function sendForgetMail(email, user, token, lang, callback) {
               'user=' + user + '&amp;email=' + email + '&amp;lang=' + lang +
               '&amp;key=' + token + '&amp;time=' + time.getTime();
     if (lang === 'zh-CN') {
-        subject = config.name + ' - 重设用户密码';
+        subject = '重设用户密码 - ' + config.name;
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
                '<p>如果您确实忘记了用户密码，请点击下面的链接进行重置：</p>' +
@@ -66,7 +66,7 @@ function sendForgetMail(email, user, token, lang, callback) {
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a></p>';
     } else { // default 'en'
-        subject = config.name + ' - Password Reset Required';
+        subject = 'Password Reset Required - ' + config.name;
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
                '<p>If the password of your account is missing, it can be reset by clicking the link below.</p>' +
@@ -90,14 +90,14 @@ function sendForgetMail(email, user, token, lang, callback) {
 function sendUpdateMail(email, user, lang, callback) {
     var subject = '', html = '';
     if (lang === 'zh-CN') {
-        subject = config.name + ' - 密码更新通知';
+        subject = '密码更新通知 - ' + config.name;
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
                '<p>您的登录密码已经更新。</p>' +
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name +'</a></p>';
     } else { // default 'en'
-        subject = config.name + ' - Password Update Notification';
+        subject = 'Password Update Notification - ' + config.name;
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
                '<p>Your password has been updated.</p>' +
