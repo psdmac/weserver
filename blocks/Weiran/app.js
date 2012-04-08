@@ -21,9 +21,7 @@ ws.set('transports', [                     // enable all transports (optional if
 ]);
 
 ws.sockets.on('connection', function(socket) {
-    // router for websocket
     route.onConnect(socket);
-    // socket events
     socket.on('disconnect', function(){route.onDisconnect(socket);});
     socket.on('message', function(msg){route.onMessage(socket, msg);});
     socket.on('wedata', function(data){route.onWeData(socket, data);});
