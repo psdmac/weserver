@@ -44,3 +44,6 @@ router['accountupdate'] = account.update;
 exports.activateAccount = account.activateAccount;
 exports.resetPassword = account.resetPassword;
 
+//=============================================================
+// Router for devices
+//-------------------------------------------------------------

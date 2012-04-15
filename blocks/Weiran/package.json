@@ -4,10 +4,10 @@
     "main": "./app.js",
     "private": true,
     "dependencies": {
-        "express": ">= 2.5.8",
-        "socket.io": ">= 0.9.4",
-        "eventproxy": ">= 0.1.0",
-        "mongoose": ">= 2.5.12",
-        "nodemailer": ">= 0.3.10"
+        "express": ">= 2.5.9",
+        "socket.io": ">= 0.9.5",
+        "eventproxy": ">= 0.1.1",
+        "mongoose": ">= 2.5.14",
+        "nodemailer": ">= 0.3.16"
     }
 }
