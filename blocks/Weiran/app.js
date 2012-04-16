@@ -6,20 +6,45 @@ var express = require('express'),
 var http = express.createServer();
 var ws = io.listen(http);
 
-// configuration for web socket server
-ws.enable('browser client minification');  // send minified client
-ws.enable('browser client etag');          // apply etag caching logic based on version number
-ws.enable('browser client gzip');          // gzip for file
-ws.set('log level', 1);                    // reduce logging
-ws.set('origins', config.origins);
-ws.set('transports', [                     // enable all transports (optional if you want flashsocket)
-    'websocket', 
-    'flashsocket', 
-    'htmlfile', 
-    'xhr-polling', 
-    'jsonp-polling'
-]);
+// configuration
+http.configure(function() {
+    http.use(express.bodyParser());
+    http.use(express.cookieParser());
+    http.use(express.session({secret: config.key}));
+});
 
+// development settings
+http.configure('development', function() {
+    http.use(express.static(__dirname + '/public'));
+    http.use(express.errorHandler({dumpExceptions: true, showStack: true}));
+});
+ws.configure('development', function() {
+    ws.set('log level', 3);
+    ws.set('transports', ['websocket']);
+});
+
+// production settings
+http.configure('production', function() {
+    var oneYear = 365*24*60*60*1000;
+    http.use(express.static(__dirname + '/public', {maxAge: oneYear}));
+    http.use(express.errorHandler());
+});
+ws.configure('production', function() {
+    ws.enable('browser client minification');  // send minified client
+    ws.enable('browser client etag');          // apply etag caching logic based on version number
+    ws.enable('browser client gzip');          // gzip for file
+    ws.set('log level', 1);                    // reduce logging
+    ws.set('origins', config.origins);
+    ws.set('transports', [                     // enable all transports (optional if you want flashsocket)
+        'websocket', 
+        'flashsocket', 
+        'htmlfile', 
+        'xhr-polling', 
+        'jsonp-polling'
+    ]);
+});
+
+// websocket events
 ws.sockets.on('connection', function(socket) {
     route.onConnect(socket);
     socket.on('disconnect', function(){route.onDisconnect(socket);});
@@ -32,5 +57,6 @@ http.get('/activate/account', route.activateAccount);
 http.get('/reset/password', route.resetPassword);
 
 http.listen(config.port);
-console.log("Weiran listening on port %d", ws.server.address().port);
+
+console.log("Weiran listening on port %d in %s mode", ws.server.address().port, ws.server.settings.env);
 console.log("God bless love....");
