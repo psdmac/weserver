@@ -10,5 +10,9 @@ mongoose.connect(config.db, function(err){
 
 // models
 require('./account');
+require('./device');
+require('./app');
 
 exports.Account = mongoose.model('Account');
+exports.Device = mongoose.model('Device');
+exports.App = mongoose.model('App');
