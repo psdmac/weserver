@@ -6,5 +6,5 @@ mongoose.model('App', new mongoose.Schema({
 	price: {type: Number, default: 0},
 	users: {type: Number, default: 0},
 	type: String,                           // class name
-	options: {}                             // {}
+	opts: {}                                // options for class
 }));
