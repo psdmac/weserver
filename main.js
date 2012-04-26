@@ -1,5 +1,5 @@
 var express = require('express'),
-    //connect = require('connect'),
+    connect = require('connect'),
     io = require('socket.io'),
     route = require('./route'),
     config = require('./config').config;
@@ -18,7 +18,7 @@ web.configure(function() {
 web.configure('development', function() {
     web.use(express.static(__dirname + '/public'));
     web.use(express.errorHandler({dumpExceptions: true, showStack: true}));
-    //web.use(connect.compress());
+    web.use(connect.compress());
 });
 wss.configure('development', function() {
     wss.set('log level', 3);
