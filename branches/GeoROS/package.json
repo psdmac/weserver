@@ -1,0 +1,12 @@
+{
+    "name": "GeoROS",
+    "version": "0.0.1",
+    "main": "./main.js",
+    "private": true,
+    "dependencies": {
+        "express": ">= 2.5.9",
+        "connect": ">= 2.1.2",
+        "socket.io": ">= 0.9.5",
+        "nodemailer": ">= 0.3.16"
+    }
+}

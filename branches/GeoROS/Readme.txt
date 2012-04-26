@@ -1,2 +1,2 @@
 mv config.default.js config.js
-node app.js
+node main.js
