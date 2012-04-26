@@ -18,14 +18,6 @@ $(function() {
                     "http://c.tile.openstreetmap.org/${z}/${x}/${y}.png"
                 ], {
                     attribution: "Tiles &copy; <a target='_blank' href='http://www.openstreetmap.org/' >Open Street Map</a>"
-                }),
-                new OpenLayers.Layer.OSM(OpenLayers.i18n('OSM_Cycle'), [
-                    "http://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png",
-                    "http://b.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png",
-                    "http://c.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png"
-                ], {
-                    attribution: "Tiles &copy; <a target='_blank' href='http://www.opencyclemap.org/' >Open Cycle Map</a>",
-                    numZoomLevels: 17
                 })
         ],
         controls: [
