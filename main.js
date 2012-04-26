@@ -1,5 +1,4 @@
 var express = require('express'),
-    connect = require('connect'),
     io = require('socket.io'),
     route = require('./route'),
     config = require('./config').config;
@@ -18,7 +17,6 @@ web.configure(function() {
 web.configure('development', function() {
     web.use(express.static(__dirname + '/public'));
     web.use(express.errorHandler({dumpExceptions: true, showStack: true}));
-    web.use(connect.compress());
 });
 wss.configure('development', function() {
     wss.set('log level', 3);
@@ -30,7 +28,6 @@ web.configure('production', function() {
     var oneYear = 365*24*60*60*1000;
     web.use(express.static(__dirname + '/public', {maxAge: oneYear}));
     web.use(express.errorHandler());
-    //web.use(connect.compress());
 });
 wss.configure('production', function() {
     wss.enable('browser client minification');  // send minified client
