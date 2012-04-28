@@ -23,20 +23,18 @@ function onWeData(socket, data) {
 //=============================================================
 // Websocket event handlers
 //-------------------------------------------------------------
-
 exports.onConnect = onConnect;
 exports.onDisconnect = onDisconnect;
 exports.onMessage = onMessage;
 exports.onWeData = onWeData;
 
-
 //=============================================================
 // Router for accounts
 //-------------------------------------------------------------
-
 // websocket router
 var account = require('./lib/account');
 router['accountsignin'] = account.signin;
+router['accountlogout'] = account.logout;
 router['accountforget'] = account.forget;
 router['accountcreate'] = account.create;
 router['accountupdate'] = account.update;
@@ -47,3 +45,11 @@ exports.resetPassword = account.resetPassword;
 //=============================================================
 // Router for devices
 //-------------------------------------------------------------
+// websocket router
+var device = require('./lib/device');
+router['devicecreate'] = device.create;
+router['deviceupdate'] = device.update;
+router['devicedelete'] = device.remove;
+// http router
+
+

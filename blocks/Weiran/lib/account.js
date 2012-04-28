@@ -60,6 +60,51 @@ exports.signin = function(socket, data) {
     });
 };
 
+exports.logout = function(socket, data) {
+    var feedback = {
+        type: data.type,
+        status: 0
+    };
+
+    // processing
+    socket.emit('wedata', feedback);
+    
+    Account.findOne({user: data.user}, function(err, account) {
+        if (err) { // db error
+            feedback.status = 1;
+            socket.emit('wedata', feedback);
+            console.log('db error: ' + JSON.stringify(err));
+            return;
+        }
+        if(!account) { // not found
+            feedback.status = 2;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (!account.active) {
+            feedback.status = 3;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        if (data.token !== account.token) {
+            feedback.status = 4;
+            socket.emit('wedata', feedback);
+            return;
+        }
+        // create a token for session
+        var time = new Date();
+        account.token = md5(account.pswd + time.toISOString(), config.key);
+        account.save(function(err) {
+            if (err) { // db error
+                feedback.status = 5;
+            } else { // ok
+                feedback.status = 6;
+            }
+            socket.emit('wedata', feedback);
+        });
+    });
+};
+
 exports.forget = function(socket, data) {
     var feedback = {
         type: data.type,
