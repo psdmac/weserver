@@ -1,0 +1,11 @@
+{
+    "name": "xyzhu",
+    "version": "0.0.1",
+    "main": "./main.js",
+    "private": true,
+    "dependencies": {
+        "express": ">= 2.5.9",
+        "socket.io": ">= 0.9.6",
+        "nodemailer": ">= 0.3.18"
+    }
+}
