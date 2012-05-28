@@ -1,6 +1,7 @@
 {
     "name": "xyzhu",
     "version": "0.0.1",
+    "author": "allidylls@qq.com",
     "main": "./main.js",
     "private": true,
     "dependencies": {
