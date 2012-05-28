@@ -6,5 +6,5 @@ mongoose.model('Device', new mongoose.Schema({
 	user: String,
 	used_at: {type: Date, default: Date.now},
 	type: String,       // class name
-	opts: {}            // options for class
+	opts: {}            // options for frount-class
 }));

@@ -1,17 +1,22 @@
 exports.config = {
     // service
-	host: '127.0.0.1',
-	port: 80,
-	name: 'xyzhu',
-	key: 'xyzhu',
+	portWeb: 80,
+	portTCP: 81,
 	origins: '*:*',
+	key: 'xyzhu',
 	
 	// database
+	dbHost: '127.0.0.1',
+	dbPort: 3306,
+	dbUser: 'user',
+	dbPswd: 'password',
+	dbMain: 'db_main',
+	dbData: 'db_data',
 
 	// mail
-	mail_service: 'Gmail',
-	mail_user: 'email@gmail.com',
-	mail_password: 'password',
-	mail_sender: 'email@gmail.com'
+	mailService: 'Gmail',
+	mailUser: 'email@gmail.com',
+	mailPswd: 'password',
+	mailSender: 'email@gmail.com'
 };
 

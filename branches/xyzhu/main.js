@@ -53,7 +53,7 @@ wss.sockets.on('connection', function(socket) {
 
 // router for web server
 
-web.listen(config.port);
+web.listen(config.portWeb);
 
 console.log("xyzhu listening on port %d in %s mode", wss.server.address().port, wss.server.settings.env);
 console.log("God bless love....");

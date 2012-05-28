@@ -11,6 +11,7 @@ mongoose.model('Account', new mongoose.Schema({
 	signin_count: {type: Number, default: 0},       // update on signing in
 	token: {type: String},                          // update on signing in
 	level: {type: Number, default: 0},
+	money: {type: Number, default: 10000},
 	apps: [{}],                                     // [{}]
 	devices: [{}],                                  // [{}]
 	layers: [{}],                                   // [{}]
