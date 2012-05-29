@@ -11,7 +11,12 @@ var transport = mailer.createTransport('SMTP', {
 
 function sendMail(data, callback){
 	transport.sendMail(data,function(error, response) {
-		return callback(error, response);
+		if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }
 	});
 }
 
@@ -48,7 +53,12 @@ function sendActivateMail(email, user, token, lang, callback) {
 	}
 
 	sendMail(data, function(error, response) {
-		return callback(error, response);
+		if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }	
 	});
 }
 
@@ -83,7 +93,12 @@ function sendForgetMail(email, user, token, lang, callback) {
     }
     
     sendMail(data, function(error, response) {
-        return callback(error, response);
+        if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }	
     });
 }
 
@@ -113,10 +128,124 @@ function sendUpdateMail(email, user, lang, callback) {
 	}
 
     sendMail(data, function(error, response) {
-        return callback(error, response);	
+        if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }	
+	});
+}
+
+function sendDeviceCreateMail(email, user, lang, sn, callback) {
+    var subject = '', html = '';
+    if (lang === 'zh-CN') {
+        subject = '创建设备通知 - ' + config.name;
+        html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
+               '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
+               '<p>您序列号为 <b>' + sn + '</b> 的新设备已创建成功。</p>' +
+               '<p>祝您一切顺利！</p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>';
+    } else { // default 'en'
+        subject = 'Create Device Notification - ' + config.name;
+        html = '<p>Dear <b>' + user + '</b>,</p>' +
+               '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
+               '<p>Your new device with a serial number of <b>' + sn + '</b> has been created successfully.</p>' +
+               '<p>Best Regards, </p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
+    }
+
+	var data = {
+		to: email,
+		sender: config.mail_sender,
+		subject: subject,
+		html: html
+	}
+
+    sendMail(data, function(error, response) {
+        if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }	
+	});
+}
+
+function sendDeviceDeleteMail(email, user, lang, sn, callback) {
+    var subject = '', html = '';
+    if (lang === 'zh-CN') {
+        subject = '删除设备通知 - ' + config.name;
+        html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
+               '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
+               '<p>您序列号为 <b>' + sn + '</b> 的设备已删除成功。</p>' +
+               '<p>祝您一切顺利！</p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>';
+    } else { // default 'en'
+        subject = 'Delete Device Notification - ' + config.name;
+        html = '<p>Dear <b>' + user + '</b>,</p>' +
+               '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
+               '<p>Your device with a serial number of <b>' + sn + '</b> has been deleted successfully.</p>' +
+               '<p>Best Regards, </p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
+    }
+
+	var data = {
+		to: email,
+		sender: config.mail_sender,
+		subject: subject,
+		html: html
+	}
+
+    sendMail(data, function(error, response) {
+        if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }	
+	});
+}
+
+function sendDeviceUpdateMail(email, user, lang, sn, callback) {
+    var subject = '', html = '';
+    if (lang === 'zh-CN') {
+        subject = '更新设备通知 - ' + config.name;
+        html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
+               '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
+               '<p>您序列号为 <b>' + sn + '</b> 的设备已更新成功。</p>' +
+               '<p>祝您一切顺利！</p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>';
+    } else { // default 'en'
+        subject = 'Update Device Notification - ' + config.name;
+        html = '<p>Dear <b>' + user + '</b>,</p>' +
+               '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
+               '<p>Your device with a serial number of <b>' + sn + '</b> has been modified successfully.</p>' +
+               '<p>Best Regards, </p>' +
+               '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
+    }
+
+	var data = {
+		to: email,
+		sender: config.mail_sender,
+		subject: subject,
+		html: html
+	}
+
+    sendMail(data, function(error, response) {
+        if (error) {
+            console.log('mail error: %j', error);
+        }
+        if (typeof callback === 'function') {
+            return callback(error, response);
+        }	
 	});
 }
 
 exports.sendActivateMail = sendActivateMail;
 exports.sendForgetMail = sendForgetMail;
 exports.sendUpdateMail = sendUpdateMail;
+exports.sendDeviceCreateMail = sendDeviceCreateMail;
+exports.sendDeviceDeleteMail = sendDeviceDeleteMail;
+exports.sendDeviceUpdateMail = sendDeviceUpdateMail;
+
