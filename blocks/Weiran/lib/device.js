@@ -187,7 +187,7 @@ exports.remove = function(socket, data) {
         
         // remove device from account.devices array
         for(var i = account.devices.length - 1; i >= 0; i--) {
-            if (account.devices[i].id == data.sn) {
+            if (account.devices[i].id === data.sn) {
                 account.devices.splice(i,1);
                 break;
             }

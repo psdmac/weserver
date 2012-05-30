@@ -5,6 +5,6 @@ mongoose.model('App', new mongoose.Schema({
 	description: {},                        // {en: html, zh-CN: html}
 	price: {type: Number, default: 0},
 	users: {type: Number, default: 0},
-	type: String,                           // class name
+	type: String,                           // category
 	opts: {}                                // options for class
 }));
