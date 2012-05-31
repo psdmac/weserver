@@ -60,6 +60,7 @@ $('#camera input:button').click(function(event) {
     
     $.post('/admin/device/create', {dstr: JSON.stringify(device)}, function(data) {
         $('#camera span').text(data);
+        $('#camera input:text').val('');
     });
 });
 </script>
