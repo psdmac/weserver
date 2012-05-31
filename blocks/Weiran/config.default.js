@@ -2,12 +2,12 @@ exports.config = {
     // service
 	host: '127.0.0.1', // ip/domain, without http:// header and / tailer
 	port: 80,
-	name: 'fanghuanweiran.com',
-	key: 'fanghuanyuweiran',
+	name: 'name',
+	key: 'key',
 	origins: '*:*',
 	
 	// database
-	db: 'mongodb://127.0.0.1/weiran',
+	db: 'mongodb://host/name',
 
 	// mail
 	mail_service: 'Gmail',

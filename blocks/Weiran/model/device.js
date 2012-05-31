@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
 
 mongoose.model('Device', new mongoose.Schema({
-    model: {type: String, uppercase: true, index: true},
+    sn: {type: String, lowercase: true, index: true},
+    model: {type: String, uppercase: true},
     created_by: String,
     updated_by: String,
     updated_at: Date,

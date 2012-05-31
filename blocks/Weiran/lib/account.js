@@ -49,6 +49,7 @@ exports.signin = function(socket, data) {
                     user: account.user,
                     email: account.email,
                     token: account.token,
+                    money: account.money,
                     apps: account.apps,
                     devices: account.devices,
                     layers: account.layers,
