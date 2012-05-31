@@ -58,5 +58,6 @@ http.get('/reset/password', route.resetPassword);
 
 http.listen(config.port);
 
+console.log(new Date().toString());
 console.log("Weiran listening on port %d in %s mode", ws.server.address().port, ws.server.settings.env);
 console.log("God bless love....");
