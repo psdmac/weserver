@@ -359,3 +359,27 @@ exports.resetPassword = function(req, res) {
         });
     });
 };
+
+exports.validateAdmin = function(req, res) {
+    req.session.validated = false;
+    
+    var admin = req.body.admin;
+    if (!admin) {
+        res.send('error: 1');
+        return;
+    }
+    
+    var admins = config.admins.split(','), found = false;
+    for (var i=0, len=admins.length; i<len; i++) {
+        if (admin === md5(admins[i])) {
+            found = true;
+            break;
+        }
+    }
+    if (found) {
+        res.send('ok');
+        req.session.validated = true;
+    } else {
+        res.send('error: 2');
+    }
+};

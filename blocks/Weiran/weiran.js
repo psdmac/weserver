@@ -55,9 +55,11 @@ ws.sockets.on('connection', function(socket) {
 // router for http
 http.get('/activate/account', route.activateAccount);
 http.get('/reset/password', route.resetPassword);
+http.post('/admin/validate', route.validateAdmin);
+http.post('/admin/device/create', route.createDevice);
 
 http.listen(config.port);
 
-console.log(new Date().toString());
+console.log('-- %s', new Date().toISOString());
 console.log("Weiran listening on port %d in %s mode", ws.server.address().port, ws.server.settings.env);
 console.log("God bless love....");

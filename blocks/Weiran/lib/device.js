@@ -1,6 +1,6 @@
 var Account = require('../model').Account,
     Device = require('../model').Device,
-    //md5 = require('./md5').md5,
+    md5 = require('./md5').md5,
     mailer = require('./mail'),
     config = require('../config').config;
     
@@ -228,6 +228,57 @@ exports.remove = function(socket, data) {
                     socket.emit('wedata', feedback);
                 });
             });
+        });
+    });
+};
+
+exports.adminCreate = function(req, res) {
+    if (!req.session.validated) {
+        res.send('error: 1, access denied');
+	    return;
+    }
+    
+    if (!req.body.dstr) {
+        res.send('error: 2, invalid query parameters');
+	    return;
+    }
+    
+    req.body = JSON.parse(req.body.dstr);
+    var admin = req.body.admin,
+        model = req.body.model,
+	    type = req.body.type,
+	    opts = req.body.opts;
+	    
+	if (!admin || !model || !type || !opts) {
+	    res.send('error: 3, invalid query parameters');
+	    return;
+	}
+	
+	var device = new Device();
+	device.sn = md5(device._id + config.key).slice(8, 24);
+	device.created_by = admin;
+	device.model = model;
+	device.type = type;
+	device.opts = opts;
+	
+	Device.findOne({sn: device.sn}, function(err, dev) {
+	    if (err) {
+	        console.log('db error: %j', err);
+	        res.send('error: 4, db error');
+	        return;
+	    }
+        if (dev) { // duplicate sn
+            res.send('error: 5, duplicate serial number: ' + device.sn);
+            return;
+        }
+    
+        device.save(function(err) {
+            if (err) { // db error
+                console.log('db error: %j', err);
+	            res.send('error: 6, db error');
+	            return;
+            }
+            res.send('OK, serial number: ' + device.sn);
         });
     });
 };

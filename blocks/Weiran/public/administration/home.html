@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Weiran</title>
+<script src=http://jpp.googlecode.com/svn/jquery/jquery-1.7.2.min.js></script>
+<script src=http://jpp.googlecode.com/svn/jquery/plugins/jquery.cookies-2.2.0.min.js></script>
+<script src=http://jpp.googlecode.com/svn/weiran/weiran-1.0.0.min.js></script>
+<script src=http://jpp.googlecode.com/svn/md5/md5-1.0.min.js></script>
+<script>if (!$.cookies.get('admin')) {window.location.href = 'index.html';}</script>
+<style>
+    select {
+        width: 200px;
+    }
+    input[type=text] {
+        width: 500px;
+    }
+    input[type=button] {
+        width: 120px;
+    }
+</style>
+</head>
+<body>
+<h1>Weiran Certified Device Creation</h1>
+
+<hr />
+
+<div id=camera>
+<h2>Camera</h2>
+<table>
+<tr><td>Model</td><td><select><option value=mms>MMS</option><option value=webcam>WEBCAM</option></select></td></tr>
+<tr><td>Camera</td><td><input type=text /></td></tr>
+</table>
+<p><input type=button value=Create /> <span></span></p>
+</div>
+<script>
+$('#camera input:button').click(function(event) {
+    var model = $('#camera select').val().toLowerCase(),
+        camera = $('#camera input:text').val();
+    if (!model || !camera) {
+        $('#camera span').text('Both of Model and Camera are required');
+        return;
+    }
+    
+    var device = {
+        admin: $.cookies.get('admin'),
+        model: model,
+        type: 'Camera',
+        opts: {
+            title: 'Weiran Certified Device',
+            lonlat: [116.391499, 39.903177],
+            icon: 'http://www.fanghuanweiran.com/devices/' + model + '/icon.png', 
+            page: 'http://www.fanghuanweiran.com/devices/' + model + '/index.html', 
+            width: 540,
+            height: 300,
+            dragable: true,
+            camera: camera
+        }
+    }
+    
+    $.post('/admin/device/create', {dstr: JSON.stringify(device)}, function(data) {
+        $('#camera span').text(data);
+    });
+});
+</script>
+
+<hr />
+
+</body>
+</html>

@@ -1,13 +1,12 @@
 {
     "name": "Weiran",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "main": "./weiran.js",
     "private": true,
     "dependencies": {
         "express":      ">= 2.5.9",
         "socket.io":    ">= 0.9.6",
-        "eventproxy":   ">= 0.1.1",
-        "mongoose":     ">= 2.6.0",
-        "nodemailer":   ">= 0.3.18"
+        "mongoose":     ">= 2.6.5",
+        "nodemailer":   ">= 0.3.20"
     }
 }

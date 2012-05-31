@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Weiran</title>
+<style>
+    body {
+        background: blue;
+        color: white;
+    }
+    div {
+        margin-top: 240px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+<div><input id=text type=text disabled=disabled /><input id=button type=button value=' ' disabled=disabled /></div>
+<script src=http://jpp.googlecode.com/svn/jquery/jquery-1.7.2.min.js></script>
+<script src=http://jpp.googlecode.com/svn/jquery/plugins/jquery.cookies-2.2.0.min.js></script>
+<script src=http://jpp.googlecode.com/svn/weiran/weiran-1.0.0.min.js></script>
+<script src=http://jpp.googlecode.com/svn/md5/md5-1.0.min.js></script>
+<script>
+$(function() {
+    $('input').removeAttr('disabled');
+    
+    $('#text').bind('keypress', function(event) {
+        if (event.which == 13) {
+            $('#button').click();
+            event.preventDefault();
+        }
+    });
+    
+    $('#button').bind('click', function(event) {
+        var text = $('#text').val();
+        if (text) {
+            $.post('/admin/validate', {admin: md5(text)}, function(data) {
+                if (data === 'ok') {
+                    $.cookies.set('admin', text);
+                    window.location.href = 'home.html';
+                } else {
+                    $('text').val('');
+                }
+            });
+        }
+    });
+});
+</script>
+</body>
+</html>

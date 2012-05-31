@@ -41,6 +41,7 @@ router['accountupdate'] = account.update;
 // http router
 exports.activateAccount = account.activateAccount;
 exports.resetPassword = account.resetPassword;
+exports.validateAdmin = account.validateAdmin;
 
 //=============================================================
 // Router for devices
@@ -51,5 +52,5 @@ router['devicecreate'] = device.create;
 router['deviceupdate'] = device.update;
 router['devicedelete'] = device.remove;
 // http router
-
+exports.createDevice = device.adminCreate;
 

@@ -13,6 +13,9 @@ exports.config = {
 	mail_service: 'Gmail',
 	mail_user: 'email@gmail.com',
 	mail_password: 'password',
-	mail_sender: 'email@gmail.com'
+	mail_sender: 'email@gmail.com',
+	
+	// administrators
+	admins: 'admin1,admin2,admin3'
 };
 
