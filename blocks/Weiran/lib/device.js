@@ -38,7 +38,7 @@ exports.create = function(socket, data) {
         }
         
         // find device
-        Device.findById(data.sn, function(err, device) {
+        Device.findOne({sn: data.sn}, function(err, device) {
             if (err) { // db error
                 feedback.status = 5;
                 socket.emit('wedata', feedback);
@@ -68,7 +68,7 @@ exports.create = function(socket, data) {
                 }
                 // add to account.device
                 var dev = {
-                    id: device._id.toString(), // serial number
+                    sn: device.sn, // serial number
                     model: device.model,
 	                type: device.type,
 	                opts: device.opts // options for class type
@@ -127,7 +127,7 @@ exports.update = function(socket, data) {
         
         // update device in account.devices array
         for(var i = account.devices.length - 1; i >= 0; i--) {
-            if (account.devices[i].id == data.sn) {
+            if (account.devices[i].sn == data.sn) {
                 account.devices[i].opts.title = data.title;
                 account.devices[i].opts.icon = data.icon;
                 break;
@@ -187,7 +187,7 @@ exports.remove = function(socket, data) {
         
         // remove device from account.devices array
         for(var i = account.devices.length - 1; i >= 0; i--) {
-            if (account.devices[i].id === data.sn) {
+            if (account.devices[i].sn === data.sn) {
                 account.devices.splice(i,1);
                 break;
             }
@@ -202,7 +202,7 @@ exports.remove = function(socket, data) {
                 return;
             }
             // unuse this device
-            Device.findById(data.sn, function(err, device) {
+            Device.findOne({sn: data.sn}, function(err, device) {
                 if (err) { // db error
                     feedback.status = 6;
                     socket.emit('wedata', feedback);
