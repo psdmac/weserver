@@ -67,5 +67,39 @@ $('#camera input:button').click(function(event) {
 
 <hr />
 
+<div id=query>
+<p><input id=query type=button value=Query /> <input id=clear type=button value=Clear /></p>
+<pre></pre>
+</div>
+<script>
+$('#query #query').click(function(event) {
+    $.get('/admin/device/query', function(data) {
+        var devices = JSON.parse(data);
+        if (Weiran.Array.isArray(devices)) {
+            var i = 0, len = devices.length, dev, str = '';
+            for (i=0; i<len; i++) {
+                dev = {
+                    admin: devices[i].created_by,
+                    sn: devices[i].sn,
+                    used: devices[i].used,
+                    model: devices[i].model,
+                    type: devices[i].type,
+                    opts: devices[i].opts
+                };
+                str += ('Dev-' + Weiran.Number.zeroize(i+1, 6) + ': ' + JSON.stringify(dev) + '\n');
+            }
+            $('#query pre').text(str);
+        } else {
+            $('#query pre').text(data);
+        }
+    });
+});
+$('#query #clear').click(function(event) {
+    $('#query pre').empty();
+});
+</script>
+
+<hr />
+
 </body>
 </html>

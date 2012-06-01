@@ -282,3 +282,20 @@ exports.adminCreate = function(req, res) {
         });
     });
 };
+
+exports.adminQuery = function(req, res) {
+    if (!req.session.validated) {
+        res.send('error: 1, access denied');
+	    return;
+    }
+    
+    Device.find({}, function(err, devs) {
+	    if (err) {
+	        console.log('db error: %j', err);
+	        res.send('error: 2, db error');
+	        return;
+	    }
+        
+        res.send(JSON.stringify(devs));
+    });
+};
