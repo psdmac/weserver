@@ -38,14 +38,14 @@ exports.create = function(socket, data) {
         }
         
         // find device
-        Device.findOne({sn: data.sn}, function(err, device) {
+        Device.findById(data.sn, function(err, device) {
             if (err) { // db error
                 feedback.status = 5;
                 socket.emit('wedata', feedback);
                 console.log('db error: %j', err);
                 return;
             }
-            if (!device) { // not found
+            if (!device || device.key !== data.key) { // not found or identification code error
                 feedback.status = 6;
                 socket.emit('wedata', feedback);
                 return;
@@ -68,7 +68,7 @@ exports.create = function(socket, data) {
                 }
                 // add to account.device
                 var dev = {
-                    sn: device.sn, // serial number
+                    sn: data.sn, // serial number
                     model: device.model,
 	                type: device.type,
 	                opts: device.opts // options for class type
@@ -78,6 +78,9 @@ exports.create = function(socket, data) {
                 account.save(function(err) {
                     if (err) { // db error
                         feedback.status = 9;
+                        // unuse device
+                        device.used = false;
+                        device.save(function(derr) {if (derr) {console.log('db error: %j', derr);}});
                         console.log('db error: %j', err);
                     } else { // ok
                         feedback.status = 10;
@@ -127,7 +130,7 @@ exports.update = function(socket, data) {
         
         // update device in account.devices array
         for(var i = account.devices.length - 1; i >= 0; i--) {
-            if (account.devices[i].sn == data.sn) {
+            if (account.devices[i].sn === data.sn) {
                 account.devices[i].opts.title = data.title;
                 account.devices[i].opts.icon = data.icon;
                 break;
@@ -201,8 +204,13 @@ exports.remove = function(socket, data) {
                 console.log('db error: %j', err);
                 return;
             }
+            
+            feedback.sn = data.sn;
+            // mail notify
+            mailer.sendDeviceDeleteMail(account.email, account.user, data.lang, data.sn);
+
             // unuse this device
-            Device.findOne({sn: data.sn}, function(err, device) {
+            Device.findById(data.sn, function(err, device) {
                 if (err) { // db error
                     feedback.status = 6;
                     socket.emit('wedata', feedback);
@@ -221,9 +229,6 @@ exports.remove = function(socket, data) {
                         console.log('db error: %j', err);
                     } else { // ok
                         feedback.status = 9;
-                        feedback.sn = data.sn;
-                        // mail notify
-                        mailer.sendDeviceDeleteMail(account.email, account.user, data.lang, data.sn);
                     }
                     socket.emit('wedata', feedback);
                 });
@@ -243,32 +248,28 @@ exports.adminCreate = function(req, res) {
 	    return;
     }
     
-    req.body = JSON.parse(req.body.dstr);
-    var admin = req.body.admin,
-        model = req.body.model,
-	    type = req.body.type,
-	    opts = req.body.opts;
+    var request = JSON.parse(req.body.dstr);
 	    
-	if (!admin || !model || !type || !opts) {
+	if (!request.key || !request.model || !request.admin || !request.type || typeof request.opts !== 'object') {
 	    res.send('error: 3, invalid query parameters');
 	    return;
 	}
 	
 	var device = new Device();
-	device.sn = md5(device._id + config.key).slice(8, 24);
-	device.created_by = admin;
-	device.model = model;
-	device.type = type;
-	device.opts = opts;
+	device.key = request.key;
+	device.model = request.model;
+	device.created_by = request.admin;
+	device.type = request.type;
+	device.opts = request.opts;
 	
-	Device.findOne({sn: device.sn}, function(err, dev) {
+	Device.findOne({key: device.key}, function(err, dev) {
 	    if (err) {
 	        console.log('db error: %j', err);
 	        res.send('error: 4, db error');
 	        return;
 	    }
-        if (dev) { // duplicate sn
-            res.send('error: 5, duplicate serial number: ' + device.sn);
+        if (dev) { // duplicate id code
+            res.send('error: 5, duplicate identification code: ' + device.key);
             return;
         }
     
@@ -278,24 +279,39 @@ exports.adminCreate = function(req, res) {
 	            res.send('error: 6, db error');
 	            return;
             }
-            res.send('OK, serial number: ' + device.sn);
+            var sn = device._id.toString();
+            
+            res.send('OK, serial number: ' +
+                sn.slice(0,8) + '-' + sn.slice(8,14) + '-' + sn.slice(14,18) + '-' + sn.slice(18));
         });
     });
 };
 
 exports.adminQuery = function(req, res) {
     if (!req.session.validated) {
-        res.send('error: 1, access denied');
+        res.send('{"error": 1, "reason": "access denied"}');
 	    return;
     }
     
     Device.find({}, function(err, devs) {
 	    if (err) {
 	        console.log('db error: %j', err);
-	        res.send('error: 2, db error');
+	        res.send('{"error": 2, "reason": "db error"}');
 	        return;
 	    }
+	    
+	    var i, len, sn, devices = [];
+	    for (i=0, len=devs.length; i<len; i++) {
+	        sn = devs[i]._id.toString();
+	        devices.push({
+                sn: sn.slice(0,8) + '-' + sn.slice(8,14) + '-' + sn.slice(14,18) + '-' + sn.slice(18),
+                model: devs[i].model,
+	            admin: devs[i].created_by,
+                used: devs[i].used,
+                key: devs[i].key
+	        });
+	    }
         
-        res.send(JSON.stringify(devs));
+        res.send(JSON.stringify(devices));
     });
 };

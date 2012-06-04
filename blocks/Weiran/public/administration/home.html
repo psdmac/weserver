@@ -35,16 +35,17 @@
 </div>
 <script>
 $('#camera input:button').click(function(event) {
-    var model = $('#camera select').val().toLowerCase(),
-        camera = $('#camera input:text').val();
+    var model = Weiran.String.trim($('#camera select').val()),
+        camera = Weiran.String.trim($('#camera input:text').val());
     if (!model || !camera) {
         $('#camera span').text('Both of Model and Camera are required');
         return;
     }
     
     var device = {
-        admin: $.cookies.get('admin'),
+        key: camera, // set camera url as device identification code
         model: model,
+        admin: $.cookies.get('admin'),
         type: 'Camera',
         opts: {
             title: 'Weiran Certified Device',
@@ -78,14 +79,7 @@ $('#query #query').click(function(event) {
         if (Weiran.Array.isArray(devices)) {
             var i = 0, len = devices.length, dev, str = '';
             for (i=0; i<len; i++) {
-                dev = {
-                    admin: devices[i].created_by,
-                    sn: devices[i].sn,
-                    used: devices[i].used,
-                    model: devices[i].model,
-                    type: devices[i].type,
-                    opts: devices[i].opts
-                };
+                dev = devices[i];
                 str += ('Dev-' + Weiran.Number.zeroize(i+1, 6) + ': ' + JSON.stringify(dev) + '\n');
             }
             $('#query pre').text(str);

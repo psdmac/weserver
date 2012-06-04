@@ -35,11 +35,10 @@ $(function() {
         var text = $('#text').val();
         if (text) {
             $.post('/admin/validate', {admin: md5(text)}, function(data) {
+                $('text').val('');
                 if (data === 'ok') {
                     $.cookies.set('admin', text);
                     window.location.href = 'home.html';
-                } else {
-                    $('text').val('');
                 }
             });
         }

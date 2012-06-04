@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
 
 mongoose.model('Device', new mongoose.Schema({
-    sn: {type: String, lowercase: true, index: true},
+    // _id as device serial number
+    key: {type: String, index: true}, // identification code
     model: {type: String, uppercase: true},
     created_by: String,
     updated_by: String,
