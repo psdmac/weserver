@@ -237,6 +237,66 @@ exports.remove = function(socket, data) {
     });
 };
 
+exports.updatePosition = function(req, res) {
+    // TODO: set allowed domains in configuration file
+    res.header('Access-Control-Allow-Origin', '*');
+    
+    if (typeof req.body.dstr !== 'string') {
+        res.send('{"error": 1, "reason": "invalid query"}');
+	    return;
+    }
+    
+    var request = JSON.parse(req.body.dstr);
+    if (typeof request !== 'object') {
+        res.send('{"error": 1, "reason": "invalid query"}');
+    }
+    
+    // find account
+    Account.findOne({user: request.user}, function(err, account) {
+        if (err) { // db error
+            res.send('{"error": 2, "reason": "db error"}');
+            console.log('db error: %j', err);
+            return;
+        }
+        if(!account) { // not found
+            res.send('{"error": 3, "reason": "invalid account"}');
+            return;
+        }
+        if (!account.active) {
+            res.send('{"error": 4, "reason": "inactive account"}');
+            return;
+        }
+        if (request.token !== account.token) {
+            res.send('{"error": 5, "reason": "invalid token"}');
+            return;
+        }
+        
+        // update device in account.devices array
+        for(var i = account.devices.length - 1; i >= 0; i--) {
+            if (account.devices[i].sn === request.sn) {
+                if (request.type === 'position' && Array.isArray(request.lonlat)) {
+                    account.devices[i].opts.lonlat = request.lonlat;
+                } else if (request.type === 'titleicon') {
+                    account.devices[i].opts.title = request.title;
+                    account.devices[i].opts.icon = request.icon;
+                }
+                break;
+            }
+        }
+        
+        // save into database
+        account.markModified('devices');
+        account.save(function(err) {
+            if (err) {
+                res.send('{"error": 6, "reason": "db error"}');
+                console.log('db error: %j', err);
+            } else {
+                res.send('{"error": 0, "reason": "ok"}');
+            }
+        });
+    });
+};
+
 exports.adminCreate = function(req, res) {
     if (!req.session.validated) {
         res.send('error: 1, access denied');

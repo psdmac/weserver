@@ -55,6 +55,7 @@ ws.sockets.on('connection', function(socket) {
 // router for http
 http.get('/activate/account', route.activateAccount);
 http.get('/reset/password', route.resetPassword);
+http.post('/device/update/position', route.deviceUpdatePosition);
 http.post('/admin/validate', route.validateAdmin);
 http.post('/admin/device/create', route.createDevice);
 http.get('/admin/device/query', route.queryDevice);

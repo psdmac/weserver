@@ -54,4 +54,4 @@ router['devicedelete'] = device.remove;
 // http router
 exports.createDevice = device.adminCreate;
 exports.queryDevice = device.adminQuery;
-
+exports.deviceUpdatePosition = device.updatePosition;
