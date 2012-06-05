@@ -360,15 +360,16 @@ exports.adminQuery = function(req, res) {
 	        return;
 	    }
 	    
-	    var i, len, sn, devices = [];
+	    var i, len, sn, key, devices = [];
 	    for (i=0, len=devs.length; i<len; i++) {
 	        sn = devs[i]._id.toString();
+	        key = devs[i].key;
 	        devices.push({
                 sn: sn.slice(0,8) + '-' + sn.slice(8,14) + '-' + sn.slice(14,18) + '-' + sn.slice(18),
+                key: key.slice(0,8) + '-' + key.slice(8,12) + '-' + key.slice(12,16) + '-' + key.slice(16,20)  + '-' + key.slice(20),
                 model: devs[i].model,
-	            admin: devs[i].created_by,
                 used: devs[i].used,
-                key: devs[i].key
+	            admin: devs[i].created_by
 	        });
 	    }
         

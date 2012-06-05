@@ -43,7 +43,7 @@ $('#camera input:button').click(function(event) {
     }
     
     var device = {
-        key: camera, // set camera url as device identification code
+        key: md5(camera), // set camera url as a key to device identification code
         model: model,
         admin: $.cookies.get('admin'),
         type: 'Camera',
@@ -54,7 +54,6 @@ $('#camera input:button').click(function(event) {
             page: 'http://www.fanghuanweiran.com/devices/' + model + '/index.html', 
             width: 540,
             height: 300,
-            dragable: true,
             camera: camera
         }
     }
