@@ -1,4 +1,5 @@
 var express = require('express'),
+    MongoStore = require('connect-mongo')(express),
     io = require('socket.io'),
     route = require('./route'),
     config = require('./config').config;
@@ -10,7 +11,10 @@ var ws = io.listen(http);
 http.configure(function() {
     http.use(express.bodyParser());
     http.use(express.cookieParser());
-    http.use(express.session({secret: config.key}));
+    http.use(express.session({
+        secret: config.key,
+        store: new MongoStore({url: (config.db + '/sessions')})
+    }));
 });
 
 // development settings
