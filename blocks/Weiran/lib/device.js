@@ -131,8 +131,15 @@ exports.update = function(socket, data) {
         // update device in account.devices array
         for(var i = account.devices.length - 1; i >= 0; i--) {
             if (account.devices[i].sn === data.sn) {
-                account.devices[i].opts.title = data.title;
-                account.devices[i].opts.icon = data.icon;
+                if (typeof data.title === 'string') {
+                    account.devices[i].opts.title = data.title;
+                }
+                if (typeof data.icon === 'string') {
+                    account.devices[i].opts.icon = data.icon;
+                }
+                if (Array.isArray(data.lonlat) && data.lonlat.length === 2) {
+                    account.devices[i].opts.lonlat = data.lonlat;
+                }
                 break;
             }
         }
@@ -145,10 +152,14 @@ exports.update = function(socket, data) {
             } else { // ok
                 feedback.status = 6;
                 feedback.sn = data.sn;
-                feedback.icon = data.icon;
-                feedback.title = data.title;
-                // mail notify
-                mailer.sendDeviceUpdateMail(account.email, account.user, data.lang, data.sn);
+                if (typeof data.icon === 'string') {
+                    feedback.icon = data.icon;
+                }
+                if (typeof data.title === 'string') {
+                    feedback.title = data.title;
+                }
+                // DO NOT mail notify
+                //mailer.sendDeviceUpdateMail(account.email, account.user, data.lang, data.sn);
             }
             socket.emit('wedata', feedback);
         });
@@ -233,66 +244,6 @@ exports.remove = function(socket, data) {
                     socket.emit('wedata', feedback);
                 });
             });
-        });
-    });
-};
-
-exports.updatePosition = function(req, res) {
-    // TODO: set allowed domains in configuration file
-    res.header('Access-Control-Allow-Origin', '*');
-    
-    if (typeof req.body.dstr !== 'string') {
-        res.send('{"error": 1, "reason": "invalid query"}');
-	    return;
-    }
-    
-    var request = JSON.parse(req.body.dstr);
-    if (typeof request !== 'object') {
-        res.send('{"error": 1, "reason": "invalid query"}');
-    }
-    
-    // find account
-    Account.findOne({user: request.user}, function(err, account) {
-        if (err) { // db error
-            res.send('{"error": 2, "reason": "db error"}');
-            console.log('db error: %j', err);
-            return;
-        }
-        if(!account) { // not found
-            res.send('{"error": 3, "reason": "invalid account"}');
-            return;
-        }
-        if (!account.active) {
-            res.send('{"error": 4, "reason": "inactive account"}');
-            return;
-        }
-        if (request.token !== account.token) {
-            res.send('{"error": 5, "reason": "invalid token"}');
-            return;
-        }
-        
-        // update device in account.devices array
-        for(var i = account.devices.length - 1; i >= 0; i--) {
-            if (account.devices[i].sn === request.sn) {
-                if (request.type === 'position' && Array.isArray(request.lonlat)) {
-                    account.devices[i].opts.lonlat = request.lonlat;
-                } else if (request.type === 'titleicon') {
-                    account.devices[i].opts.title = request.title;
-                    account.devices[i].opts.icon = request.icon;
-                }
-                break;
-            }
-        }
-        
-        // save into database
-        account.markModified('devices');
-        account.save(function(err) {
-            if (err) {
-                res.send('{"error": 6, "reason": "db error"}');
-                console.log('db error: %j', err);
-            } else {
-                res.send('{"error": 0, "reason": "ok"}');
-            }
         });
     });
 };
