@@ -70,7 +70,6 @@ exports.create = function(socket, data) {
                 var dev = {
                     sn: data.sn, // serial number
                     model: device.model,
-	                type: device.type,
 	                opts: device.opts // options for class type
                 };
                 account.devices.push(dev);
@@ -261,7 +260,7 @@ exports.adminCreate = function(req, res) {
     
     var request = JSON.parse(req.body.dstr);
 	    
-	if (!request.key || !request.model || !request.admin || !request.type || typeof request.opts !== 'object') {
+	if (!request.key || !request.model || !request.admin || typeof request.opts !== 'object') {
 	    res.send('error: 3, invalid query parameters');
 	    return;
 	}
@@ -270,7 +269,6 @@ exports.adminCreate = function(req, res) {
 	device.key = request.key;
 	device.model = request.model;
 	device.created_by = request.admin;
-	device.type = request.type;
 	device.opts = request.opts;
 	
 	Device.findOne({key: device.key}, function(err, dev) {

@@ -10,6 +10,5 @@ mongoose.model('Device', new mongoose.Schema({
 	used: {type: Boolean, default: false},
 	user: String,
 	used_at: Date,
-	type: String,       // subclass name
 	opts: {}            // options for frount-class
 }));

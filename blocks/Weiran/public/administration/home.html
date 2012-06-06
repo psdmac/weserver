@@ -46,12 +46,11 @@ $('#camera input:button').click(function(event) {
         key: md5(camera), // set camera url as a key to device identification code
         model: model,
         admin: $.cookies.get('admin'),
-        type: 'Camera',
         opts: {
             title: 'Weiran Certified Device',
             lonlat: [116.391499, 39.903177],
-            icon: 'http://www.fanghuanweiran.com/devices/' + model + '/icon.png', 
-            page: 'http://www.fanghuanweiran.com/devices/' + model + '/index.html', 
+            icon: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/icon.png', 
+            page: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/index.html', 
             width: 540,
             height: 300,
             camera: camera

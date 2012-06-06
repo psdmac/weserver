@@ -379,6 +379,11 @@ exports.validateAdmin = function(req, res) {
     if (found) {
         res.send('ok');
         req.session.validated = true;
+        req.session.save(function(err) {
+            if (err) {
+                console.log('db error: %j', err);
+            }
+        });
     } else {
         res.send('error: 2');
     }
