@@ -139,18 +139,20 @@ function sendUpdateMail(email, user, lang, callback) {
 
 function sendDeviceCreateMail(email, user, lang, sn, callback) {
     var subject = '', html = '';
+    sn = sn.slice(0,8) + '-' + sn.slice(8,14) + '-' + sn.slice(14,18) + '-' + sn.slice(18);
+    
     if (lang === 'zh-CN') {
         subject = '创建设备通知 - ' + config.name;
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
-               '<p>您序列号为 <b>' + sn + '</b> 的新设备已创建成功。</p>' +
+               '<p>您序列号为 [<b>' + sn + '</b>] 的新设备已创建成功。</p>' +
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>';
     } else { // default 'en'
         subject = 'Create Device Notification - ' + config.name;
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
-               '<p>Your new device with a serial number of <b>' + sn + '</b> has been created successfully.</p>' +
+               '<p>Your device which serial number is [<b>' + sn + '</b>] has been created successfully.</p>' +
                '<p>Best Regards, </p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
     }
@@ -174,18 +176,20 @@ function sendDeviceCreateMail(email, user, lang, sn, callback) {
 
 function sendDeviceDeleteMail(email, user, lang, sn, callback) {
     var subject = '', html = '';
+    sn = sn.slice(0,8) + '-' + sn.slice(8,14) + '-' + sn.slice(14,18) + '-' + sn.slice(18);
+    
     if (lang === 'zh-CN') {
         subject = '删除设备通知 - ' + config.name;
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
-               '<p>您序列号为 <b>' + sn + '</b> 的设备已删除成功。</p>' +
+               '<p>您序列号为 [<b>' + sn + '</b>] 的设备已删除成功。</p>' +
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>';
     } else { // default 'en'
         subject = 'Delete Device Notification - ' + config.name;
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
-               '<p>Your device with a serial number of <b>' + sn + '</b> has been deleted successfully.</p>' +
+               '<p>Your device which serial number is [<b>' + sn + '</b>] has been deleted successfully.</p>' +
                '<p>Best Regards, </p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
     }
@@ -209,18 +213,20 @@ function sendDeviceDeleteMail(email, user, lang, sn, callback) {
 
 function sendDeviceUpdateMail(email, user, lang, sn, callback) {
     var subject = '', html = '';
+    sn = sn.slice(0,8) + '-' + sn.slice(8,14) + '-' + sn.slice(14,18) + '-' + sn.slice(18);
+    
     if (lang === 'zh-CN') {
         subject = '更新设备通知 - ' + config.name;
         html = '<p>亲爱的 <b>' + user + '</b>，</p>' +
                '<p>感谢您使用 <a href=http://www.fanghuanweiran.com>' + config.name + '</a> 提供的服务。</p>' +
-               '<p>您序列号为 <b>' + sn + '</b> 的设备已更新成功。</p>' +
+               '<p>您序列号为 [<b>' + sn + '</b>] 的设备已更新成功。</p>' +
                '<p>祝您一切顺利！</p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>';
     } else { // default 'en'
         subject = 'Update Device Notification - ' + config.name;
         html = '<p>Dear <b>' + user + '</b>,</p>' +
                '<p>Thank you for enjoying your time with <a href=http://www.fanghuanweiran.com>' + config.name + '</a>.</p>' +
-               '<p>Your device with a serial number of <b>' + sn + '</b> has been modified successfully.</p>' +
+               '<p>Your device which serial number is [<b>' + sn + '</b>] has been modified successfully.</p>' +
                '<p>Best Regards, </p>' +
                '<p><a href=http://www.fanghuanweiran.com>' + config.name + '</a></p>'; 
     }
