@@ -136,6 +136,9 @@ exports.update = function(socket, data) {
                 if (typeof data.icon === 'string') {
                     account.devices[i].opts.icon = data.icon;
                 }
+                if (typeof data.alarm === 'string') {
+                    account.devices[i].opts.alarm = data.alarm;
+                }
                 if (Array.isArray(data.lonlat) && data.lonlat.length === 2) {
                     account.devices[i].opts.lonlat = data.lonlat;
                 }
@@ -151,11 +154,14 @@ exports.update = function(socket, data) {
             } else { // ok
                 feedback.status = 6;
                 feedback.sn = data.sn;
+                if (typeof data.title === 'string') {
+                    feedback.title = data.title;
+                }
                 if (typeof data.icon === 'string') {
                     feedback.icon = data.icon;
                 }
-                if (typeof data.title === 'string') {
-                    feedback.title = data.title;
+                if (typeof data.alarm === 'string') {
+                    feedback.alarm = data.alarm;
                 }
                 // DO NOT mail notify
                 //mailer.sendDeviceUpdateMail(account.email, account.user, data.lang, data.sn);

@@ -5,7 +5,7 @@
     <title>Weiran</title>
 <script src=http://jpp.googlecode.com/svn/jquery/jquery-1.7.2.min.js></script>
 <script src=http://jpp.googlecode.com/svn/jquery/plugins/jquery.cookies-2.2.0.min.js></script>
-<script src=http://jpp.googlecode.com/svn/weiran/weiran-1.0.0.min.js></script>
+<script src=http://jpp.googlecode.com/svn/weiran/weiran-1.0.1.min.js></script>
 <script src=http://jpp.googlecode.com/svn/md5/md5-1.0.min.js></script>
 <script>if (!$.cookies.get('admin')) {window.location.href = 'index.html';}</script>
 <style>
@@ -49,8 +49,9 @@ $('#camera input:button').click(function(event) {
         opts: {
             title: 'Weiran Certified Device',
             lonlat: [116.391499, 39.903177],
-            icon: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/icon.png', 
-            page: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/index.html', 
+            icon: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/icon.png',
+            page: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/index.html',
+            alarm: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/alarm.mp3',
             width: 540,
             height: 300,
             camera: camera
