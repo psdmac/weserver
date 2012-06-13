@@ -69,6 +69,7 @@ exports.create = function(socket, data) {
                 // add to account.device
                 var dev = {
                     sn: data.sn, // serial number
+                    key: data.key, // device key
                     model: device.model,
 	                opts: device.opts // options for class type
                 };
