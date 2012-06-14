@@ -6,7 +6,7 @@
     "dependencies": {
         "connect-mongo":">= 0.1.9",
         "express":      ">= 2.5.9",
-        "mongoose":     ">= 2.6.5",
+        "mongoose":     ">= 2.6.7",
         "nodemailer":   ">= 0.3.20",
         "socket.io":    ">= 0.9.6"
     }
