@@ -164,6 +164,9 @@ exports.update = function(socket, data) {
                 if (typeof data.alarm === 'string') {
                     feedback.alarm = data.alarm;
                 }
+                if (Array.isArray(data.lonlat) && data.lonlat.length === 2) {
+                    feedback.lonlat = data.lonlat;
+                }
                 // DO NOT mail notify
                 //mailer.sendDeviceUpdateMail(account.email, account.user, data.lang, data.sn);
             }
