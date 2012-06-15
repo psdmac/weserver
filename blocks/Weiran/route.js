@@ -10,10 +10,12 @@ function onDisconnect(socket) {
 };
 
 function onSubscribe(socket, sid) {
-    // store client session id
-    socket.set('clientsessionid', sid);
-    // create a room for this session
-    socket.join(sid);
+    if (typeof sid === 'string' && sid.length>0) {
+        // store client session id
+        socket.set('clientsessionid', sid);
+        // create a room for this session
+        socket.join(sid);
+    }
 };
 
 function onMessage(socket, msg) {
@@ -25,7 +27,12 @@ function onWeData(socket, data) {
     if (data && data.type && typeof router[data.type] === 'function') {
         // get room of this session
         socket.get('clientsessionid', function(err, sid) {
-            router[data.type]((err ? socket : socket.manager.sockets.in(sid)), data);
+            if (!err && sid) {
+                router[data.type](socket.manager, sid, data);
+            } else {
+                // illegel access
+                console.log('web socket error: %j, abort data: %j', err, data);
+            }
         });
     }
 };

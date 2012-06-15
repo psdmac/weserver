@@ -3,35 +3,35 @@ var Account = require('../model').Account,
     mailer = require('./mail'),
     config = require('../config').config;
 
-exports.signin = function(socket, data) {
+exports.signin = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.pswd !== account.pswd) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         // create a token for session
@@ -56,40 +56,40 @@ exports.signin = function(socket, data) {
                     features: account.features
                 };
             }
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
         });
     });
 };
 
-exports.logout = function(socket, data) {
+exports.logout = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.token !== account.token) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         // create a token for session
@@ -101,40 +101,40 @@ exports.logout = function(socket, data) {
             } else { // ok
                 feedback.status = 6;
             }
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
         });
     });
 };
 
-exports.forget = function(socket, data) {
+exports.forget = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.email !== account.email) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         
@@ -143,7 +143,7 @@ exports.forget = function(socket, data) {
         mailer.sendForgetMail(data.email, data.user, token, data.lang, function(err, res) {
             if (err) { // mailer error
                 feedback.status = 5;
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
                 console.log('mailer error: ' + JSON.stringify(err));
                 return;
             }
@@ -156,32 +156,32 @@ exports.forget = function(socket, data) {
                 } else { // ok
                     feedback.status = 7;
                 }
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
             });
         });
     });
 };
 
-exports.create = function(socket, data) {
+exports.create = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     Account.find({'$or': [{user: data.user}, {email: data.email}]}, function(err, accounts) {
         if(err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
             return;
         }
         if(accounts && accounts.length > 0) {
             // user / email using
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         
@@ -194,7 +194,7 @@ exports.create = function(socket, data) {
         account.save(function(err) {
             if (err) { // db error
                 feedback.status = 3;
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
                 console.log('db error: ' + JSON.stringify(err));
                 return;
             }
@@ -207,41 +207,41 @@ exports.create = function(socket, data) {
                 } else { // ok
                     feedback.status = 5;
                 }
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
             });
         });
     });
 };
 
-exports.update = function(socket, data) {
+exports.update = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: ' + JSON.stringify(err));
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.token !== account.token) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         
@@ -255,7 +255,7 @@ exports.update = function(socket, data) {
             } else {
                 feedback.status = 6;
             }
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
         });
         // send a notification mail
         mailer.sendUpdateMail(account.email, data.user, data.lang, function(err, res) {

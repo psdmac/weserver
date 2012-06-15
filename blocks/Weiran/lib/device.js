@@ -4,36 +4,36 @@ var Account = require('../model').Account,
     mailer = require('./mail'),
     config = require('../config').config;
     
-exports.create = function(socket, data) {
+exports.create = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     // find account
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: %j', err);
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.token !== account.token) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         
@@ -41,18 +41,18 @@ exports.create = function(socket, data) {
         Device.findById(data.sn, function(err, device) {
             if (err) { // db error
                 feedback.status = 5;
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
                 console.log('db error: %j', err);
                 return;
             }
             if (!device || device.key !== data.key) { // not found or identification code error
                 feedback.status = 6;
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
                 return;
             }
             if (device.used) {
                 feedback.status = 7;
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
                 return;
             }
             // set device used
@@ -62,7 +62,7 @@ exports.create = function(socket, data) {
             device.save(function(err) {
                 if (err) { // db error
                     feedback.status = 8;
-                    socket.emit('wedata', feedback);
+                    sio.sockets.in(room).emit('wedata', feedback);
                     console.log('db error: %j', err);
                     return;
                 }
@@ -88,43 +88,43 @@ exports.create = function(socket, data) {
                         // mail notify
                         mailer.sendDeviceCreateMail(account.email, account.user, data.lang, data.sn);
                     }
-                    socket.emit('wedata', feedback);
+                    sio.sockets.in(room).emit('wedata', feedback);
                 })
             });
         });
     });
 };
 
-exports.update = function(socket, data) {
+exports.update = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     // find account
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: %j', err);
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.token !== account.token) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         
@@ -170,41 +170,41 @@ exports.update = function(socket, data) {
                 // DO NOT mail notify
                 //mailer.sendDeviceUpdateMail(account.email, account.user, data.lang, data.sn);
             }
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
         });
     });
 };
 
-exports.remove = function(socket, data) {
+exports.remove = function(sio, room, data) {
     var feedback = {
         type: data.type,
         status: 0
     };
 
     // processing
-    socket.emit('wedata', feedback);
+    sio.sockets.in(room).emit('wedata', feedback);
     
     // find account
     Account.findOne({user: data.user}, function(err, account) {
         if (err) { // db error
             feedback.status = 1;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             console.log('db error: %j', err);
             return;
         }
         if(!account) { // not found
             feedback.status = 2;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (!account.active) {
             feedback.status = 3;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         if (data.token !== account.token) {
             feedback.status = 4;
-            socket.emit('wedata', feedback);
+            sio.sockets.in(room).emit('wedata', feedback);
             return;
         }
         
@@ -220,7 +220,7 @@ exports.remove = function(socket, data) {
         account.save(function(err) {
             if (err) { // db error
                 feedback.status = 5;
-                socket.emit('wedata', feedback);
+                sio.sockets.in(room).emit('wedata', feedback);
                 console.log('db error: %j', err);
                 return;
             }
@@ -233,13 +233,13 @@ exports.remove = function(socket, data) {
             Device.findById(data.sn, function(err, device) {
                 if (err) { // db error
                     feedback.status = 6;
-                    socket.emit('wedata', feedback);
+                    sio.sockets.in(room).emit('wedata', feedback);
                     console.log('db error: %j', err);
                     return;
                 }
                 if (!device) { // not found
                     feedback.status = 7;
-                    socket.emit('wedata', feedback);
+                    sio.sockets.in(room).emit('wedata', feedback);
                     return;
                 }
                 device.used = false;
@@ -250,7 +250,7 @@ exports.remove = function(socket, data) {
                     } else { // ok
                         feedback.status = 9;
                     }
-                    socket.emit('wedata', feedback);
+                    sio.sockets.in(room).emit('wedata', feedback);
                 });
             });
         });
