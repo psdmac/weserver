@@ -52,8 +52,9 @@ ws.configure('production', function() {
 ws.sockets.on('connection', function(socket) {
     route.onConnect(socket);
     socket.on('disconnect', function(){route.onDisconnect(socket);});
-    socket.on('message', function(msg){route.onMessage(socket, msg);});
-    socket.on('wedata', function(data){route.onWeData(socket, data);});
+    socket.on('subscribe',  function(sid){route.onSubscribe(socket, sid);});
+    socket.on('message',    function(msg){route.onMessage(socket, msg);});
+    socket.on('wedata',     function(data){route.onWeData(socket, data);});
 });
 
 // router for http

@@ -9,6 +9,13 @@ function onDisconnect(socket) {
     //console.log('on disconnect: socket id is ' + socket.id);
 };
 
+function onSubscribe(socket, sid) {
+    // store client session id
+    socket.set('clientsessionid', sid);
+    // create a room for this session
+    socket.join(sid);
+};
+
 function onMessage(socket, msg) {
     //console.log('on message: socket id is ' + socket.id + ', message is ' + msg);
 };
@@ -16,7 +23,10 @@ function onMessage(socket, msg) {
 function onWeData(socket, data) {
     //console.log('on wedata: socket id is ' + socket.id + ', data is ' + JSON.stringify(data));
     if (data && data.type && typeof router[data.type] === 'function') {
-        router[data.type](socket, data);
+        // get room of this session
+        socket.get('clientsessionid', function(err, sid) {
+            router[data.type]((err ? socket : socket.manager.sockets.in(sid)), data);
+        });
     }
 };
 
@@ -25,6 +35,7 @@ function onWeData(socket, data) {
 //-------------------------------------------------------------
 exports.onConnect = onConnect;
 exports.onDisconnect = onDisconnect;
+exports.onSubscribe = onSubscribe;
 exports.onMessage = onMessage;
 exports.onWeData = onWeData;
 
