@@ -94,6 +94,11 @@ $('#mobilegnss_create').click(function(event) {
         $('#mobilegnss_info').text('Invalid IMEI');
         return;
     }
+    var hostRegEx = /^(https?:\/\/)([\w\d_-]+\.)+\w{2,5}:\d{2,5}$/;
+    if (!hostRegEx.test(host)) {
+        $('#mobilegnss_info').text('Invalid Host');
+        return;
+    }
     
     var device = {
         key: md5(imei), // set IMEI as a key to device identification code
