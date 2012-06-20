@@ -28,7 +28,10 @@
 <div id=camera>
 <h2>Camera</h2>
 <table>
-<tr><td>Model</td><td><select><option value=mms>MMS</option><option value=webcam>WEBCAM</option></select></td></tr>
+<tr><td>Model</td><td><select>
+    <option value=mms>MMS</option>
+    <option value=webcam>WEBCAM</option>
+</select></td></tr>
 <tr><td>Camera</td><td><input type=text /></td></tr>
 </table>
 <p><input type=button value=Create /> <span></span></p>
@@ -61,6 +64,57 @@ $('#camera input:button').click(function(event) {
     $.post('/admin/device/create', {dstr: JSON.stringify(device)}, function(data) {
         $('#camera span').text(data);
         $('#camera input:text').val('');
+    });
+});
+</script>
+
+<hr />
+
+<div id=mobilegnss>
+<h2>Mobile GNSS</h2>
+<table>
+    <tr><td>Model</td><td><select id=mobilegnss_model>
+        <option value=gt02a>GT02A</option>
+    </select></td></tr>
+    <tr><td>IMEI</td><td><input type=text id=mobilegnss_imei /></td></tr>
+    <tr><td>Host</td><td><input type=text id=mobilegnss_host /></td></tr>
+</table>
+<p><input type=button value=Create id=mobilegnss_create /> <span id=mobilegnss_info></span></p>
+</div>
+<script>
+$('#mobilegnss_create').click(function(event) {
+    var model = Weiran.String.trim($('#mobilegnss_model').val()),
+        imei = Weiran.String.trim($('#mobilegnss_imei').val()),
+        host = Weiran.String.trim($('#mobilegnss_host').val());
+    if (!model || !imei || !host) {
+        $('#mobilegnss_info').text('All of Model, IMEI and Host are required');
+        return;
+    }
+    if (imei.length !== 15) {
+        $('#mobilegnss_info').text('Invalid IMEI');
+        return;
+    }
+    
+    var device = {
+        key: md5(imei), // set IMEI as a key to device identification code
+        model: model,
+        admin: $.cookies.get('admin'),
+        opts: {
+            title: 'Weiran Certified Device',
+            lonlat: [116.391499, 39.903177],
+            icon: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/icon.png',
+            page: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/index.html',
+            alarm: 'http://www.fanghuanweiran.com/devices/' + model.toLowerCase() + '/alarm.mp3',
+            width: 540,
+            height: 300,
+            imei: imei,
+            host: host
+        }
+    }
+    
+    $.post('/admin/device/create', {dstr: JSON.stringify(device)}, function(data) {
+        $('#mobilegnss_info').text(data);
+        $('#mobilegnss input:text').val('');
     });
 });
 </script>
