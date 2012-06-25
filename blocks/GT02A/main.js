@@ -3,15 +3,15 @@ var net = require('net'),
     route = require('./route'),
     config = require('./config').config;
 
-console.log('GT02A starts at %s', new Date().toISOString());
+console.log('>>');
+console.log('GT02A starts at %s in %s mode', new Date().toISOString(), process.env.NODE_ENV || 'development');
 
 // start tcp service
 var tcp = net.createServer();
-tcp.listen(config.port_tcp);
+tcp.listen(config.tcp_port);
 
 tcp.on('listening', function() {
-    console.log("%d - Listening port %d for TCP service in %s mode",
-        Date.now(), tcp.address().port, tcp.settings.env);
+    console.log("%d - Listening port %d for TCP service", Date.now(), tcp.address().port);
 });
 
 tcp.on('error', function(err) {
@@ -23,11 +23,10 @@ tcp.on('error', function(err) {
 tcp.on('connection', route.onTCPConnect);    
 
 // start websocket service
-var wss = io.listen(config.port_wss);
+var wss = io.listen(config.wss_port);
 
 wss.server.on('listening', function() {
-    console.log("%d - Listening port %d for WSS service in %s mode",
-        Date.now(), wss.server.address().port, wss.server.settings.env);
+    console.log("%d - Listening port %d for WSS service", Date.now(), wss.server.address().port);
 });
 
 wss.server.on('error', function(err) {
@@ -47,7 +46,7 @@ wss.configure('production', function() {
     wss.enable('browser client etag');          // apply etag caching logic based on version number
     wss.enable('browser client gzip');          // gzip for file
     wss.set('log level', 1);                    // reduce logging
-    wss.set('origins', config.origins);
+    wss.set('origins', config.wss_origins);
     wss.set('transports', [                     // enable all transports (optional if you want flashsocket)
         'websocket', 
         'flashsocket', 
