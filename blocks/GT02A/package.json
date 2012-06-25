@@ -1,0 +1,10 @@
+{
+    "name": "GT02A",
+    "version": "0.0.1",
+    "main": "./main.js",
+    "private": true,
+    "dependencies": {
+        "mongoskin":    ">= 0.3.6",
+        "socket.io":    ">= 0.9.6"
+    }
+}
