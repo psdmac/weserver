@@ -8,6 +8,7 @@ console.log('GT02A starts at %s in %s mode', new Date().toISOString(), process.e
 
 // start tcp service
 var tcp = net.createServer();
+
 tcp.listen(config.tcp_port);
 
 tcp.on('listening', function() {

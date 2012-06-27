@@ -1,3 +1,5 @@
 // bridge data with events between tcp, ws, and db
-var events = new require("events").EventEmitter();
+var EventEmitter = require("events").EventEmitter;
+var events = new EventEmitter();
+
 exports.events = events;

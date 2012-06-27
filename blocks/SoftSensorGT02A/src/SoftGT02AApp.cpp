@@ -74,13 +74,13 @@ void SoftGT02AApp::SetBuffer()
     // host > network
     sn = htons(sn);
     memcpy(m_pvt+13, &sn, 2);
-    m_pvt[15] = 0x10; 
+    m_pvt[15] = 0x10;
     m_pvt[16] = 11; m_pvt[17] = 6; m_pvt[18] = 21;
     m_pvt[19] = 21; m_pvt[20] = 15; m_pvt[21] = 56;
     unsigned int xx = (30.12345678*60*30000); memcpy(m_pvt+22, &xx, 4);
     xx = (120.12345678*60*30000); memcpy(m_pvt+26, &xx, 4);
     m_pvt[30] = 110; sn = 90; memcpy(m_pvt+31, &sn, 2);
-    m_pvt[33] = 0; m_pvt[34] = 0; m_pvt[35] = 0; 
+    m_pvt[33] = 0; m_pvt[34] = 0; m_pvt[35] = 0;
     xx = htonl(15); memcpy(m_pvt+36, &xx, 4);
     m_pvt[40] = 0x0d; m_pvt[41] = 0x0a;
 
@@ -157,7 +157,8 @@ void SoftGT02AApp::OnTimer(wxTimerEvent& event)
             //sleep(1);
             m_pgg[3] = num % 7;
             m_pgg[4] = num % 5;
-            m_pgg[17] = num % 13;
+            m_pgg[18] = num % 100; m_pgg[19] = num % 100;
+            m_pgg[20] = num % 100; m_pgg[21] = num % 100;
             m_pClient->Write(m_pgg, sizeof(m_pgg));
             if (m_pClient->LastCount() > 0) {
                 m_countPGG++;
