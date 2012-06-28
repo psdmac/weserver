@@ -1,32 +1,34 @@
 var xx = require("./xx"),
+    md5 = require('./md5').md5,
     config = require('../config').config;
 
 var gt02aHeartBeat = new Buffer('54681a0d0a', 'hex');
 var lonlatUnit = 1/(500*3600); // degree
+var deviceKey = {}; // {imei: md5(imei)}
 
 exports.onConnect = function(socket) {
     // configure client
     socket.setNoDelay(true);
     socket.setTimeout(config.tcp_timeout*1000);
     socket.setKeepAlive(true, config.tcp_keepalive*1000);
-}
+};
 
 exports.onEnd = function(socket) {
-}
+};
 
 exports.onClose = function(socket, err) {
     if (err) {
         console.log("%d - TCP client error: %j", Date.now(), err);
     }
-}
+};
 
 exports.onError = function(socket, err) {
     console.log('%d - TCP client error: %j', Date.now(), err);
-}
+};
 
 exports.onTimeout = function(socket) {
     socket.end();
-}
+};
 
 exports.onData = function(socket, data) {
     var len = data.length;
@@ -62,13 +64,19 @@ exports.onData = function(socket, data) {
             if (gt02a.protocol === 0x1a) { // heartbeat feedback
                 socket.write(gt02aHeartBeat);
             }
+            // calculate device key
+            if (!deviceKey[gt02a.imei]) {
+                deviceKey[gt02a.imei] = md5(gt02a.imei);
+            }
+            gt02a.key = deviceKey[gt02a.imei];
+            // emit event
             xx.events.emit('gt02a', gt02a);
         }
         
         // try next frame
         hIdx += fLen;
     }
-}
+};
 
 // decode raw frame to data object
 function decodeFrame(frame, len) {
@@ -100,6 +108,10 @@ function decodeFrame(frame, len) {
         result.stpow        = frame[39] & 0x08 ? 1 : 0;
         result.stsos        = frame[39] & 0x10 ? 1 : 0;
         result.stoff        = frame[39] & 0x20 ? 1 : 0;
+        // fix lonlat value
+        result.longitude    = limitFixDigs(result.longitude, 6);
+        result.latitude     = limitFixDigs(result.latitude, 6);
+        // validate frame
         result.valid        = true;
     } else if (result.protocol === 0x1a) { // status & heartbeat
         result.gps          = frame.readUInt8(16);
@@ -124,3 +136,10 @@ function decodeFrame(frame, len) {
     return result;
 }
 
+function limitFixDigs(num, fix) {
+    var fig = 0;
+    if (typeof fix === 'number') {
+        fig = parseFloat(num.toFixed(fix));
+    }
+    return fig;
+}
