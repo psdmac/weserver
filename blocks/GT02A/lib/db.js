@@ -42,8 +42,8 @@ exports.find = function(key, t0, t1, callback) {
         time: {$gte: t0, $lte: t1}
     }).toArray(function(error, result) {
         if (error) {
-            console.log('%d - DB error: %j', Date.now(), error);
             callback([]);
+            console.log('%d - DB error: %j', Date.now(), error);
         } else {
             callback(result);
         }

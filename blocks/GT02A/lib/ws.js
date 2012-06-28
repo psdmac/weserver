@@ -3,8 +3,7 @@ var xx = require("./xx"),
 
 var sio = null,
     deviceID = {}, // {key: id}
-    lastPVT = {},
-    lastPGG = {};
+    lastData = {}; // {key: {}}
 
 exports.onConnect = function(socket) {
     // local reference to websocket server
@@ -28,28 +27,47 @@ exports.onSubscribe = function(socket, device) {
     
     // store device sn and key
     deviceID[device.key] = device.sn;
+    socket.set('devicekey', device.key);
     
     // join the room of this device key
     socket.join(device.key);
     
     // feedback with last data of this device
-    if (lastPVT[device.key] && sio) {
-        sio.sockets.in(gt02a.key).emit('devicedata', lastPVT[device.key]);
-    }
-    if (lastPGG[device.key] && sio) {
-        sio.sockets.in(gt02a.key).emit('devicedata', lastPGG[device.key]);
+    if (lastData[device.key] && sio) {
+        sio.sockets.in(device.key).emit('devicedata', lastData[device.key]);
     }
 };
 
 // query history data
 exports.onDeviceData = function(socket, data) {
+    if (!data || data.type !== 'devicehtdata') {
+        return;
+    }
+    
+    socket.get('devicekey', function(err, key) {
+        if (err) {
+            return;
+        }
+        
+        db.find(key, data.t0, data.t1, function(result) {
+            sio.sockets.in(key).emit('devicedata', {
+                id: deviceID[key],      // weiran device protocol
+                type: 'devicehtdata',   // weiran device protocol
+                htdata: result
+            });
+        });
+    });
 };
 
 // forward realtime device data
 xx.events.on('gt02a', function(gt02a) {
-    var data = {
-        type: 'devicertdata'        // weiran device protocol
-    };
+    if (!lastData[gt02a.key]) {
+        lastData[gt02a.key] = {
+            type: 'devicertdata'        // weiran device protocol
+        };
+    }
+    
+    var data = lastData[gt02a.key];
     
     if (gt02a.protocol === 0x10) { // PVT
         data.time = gt02a.time;
@@ -62,20 +80,17 @@ xx.events.on('gt02a', function(gt02a) {
         data.stsos = gt02a.stsos;
         data.stoff = gt02a.stoff;
         data.alarm = gt02a.stsos || gt02a.stoff; //weiran device protocol
-        // save as last epoch data
-        lastPVT[gt02a.key] = data;
     } else if (gt02a.protocol === 0x1a) { // status
-        data.time = Date.now();
-        data.count = gt02a.count;
         data.spow = gt02a.power;
         data.sgsm = gt02a.gsm;
         data.sgps = gt02a.satenum;
-        // save as last epoch data
-        lastPGG[gt02a.key] = data;
     }
 
-    if (deviceID[gt02a.key] && sio) {
+    if (!data.id && deviceID[gt02a.key]) {
         data.id = deviceID[gt02a.key];
+    }
+    
+    if (data.id && sio) {
         sio.sockets.in(gt02a.key).emit('devicedata', data);
     }
 });
