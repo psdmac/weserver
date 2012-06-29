@@ -82,8 +82,8 @@ exports.onData = function(socket, data) {
 function decodeFrame(frame, len) {
     var result = {};
     
-    result.power    = frame.readUInt8(3);
-    result.gsm      = frame.readUInt8(4);
+    result.power    = frame.readUInt8(3) % 7;
+    result.gsm      = frame.readUInt8(4) % 5;
     result.imei     = frame.toString('hex', 5, 13).slice(1);
     result.count    = frame.readUInt16BE(13);
     result.protocol = frame.readUInt8(15);
@@ -114,17 +114,9 @@ function decodeFrame(frame, len) {
         // validate frame
         result.valid        = true;
     } else if (result.protocol === 0x1a) { // status & heartbeat
-        result.gps          = frame.readUInt8(16);
-        result.satenum      = frame.readUInt8(17);
-        if (len === result.satenum + 20) {
-            result.sateson      = [];
-            for (var i=0; i<result.satenum; i++) {
-                result.sateson.push(frame.readUInt8(18+i));
-            }
-            result.valid = true;
-        } else {
-            result.valid = false;
-        }
+        result.gps          = frame.readUInt8(16) % 3;
+        result.satenum      = frame.readUInt8(17) % 13;
+        result.valid        = true;
     } else { // unknown frame type
         result.valid = false;
     }
