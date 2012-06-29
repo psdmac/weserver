@@ -69,12 +69,14 @@ xx.events.on('gt02a', function(gt02a) {
     
     var data = lastData[gt02a.key];
     
-    if (gt02a.protocol === 0x10) { // PVT
-        data.time = gt02a.time;
+    if (gt02a.protocol === 0x10) { // valid PVT
         data.count = gt02a.count;
-        data.lonlat = [gt02a.longitude, gt02a.latitude]; // weiran device protocol
-        data.angle = gt02a.course; // weiran device protocol
-        data.speed = gt02a.velocity;
+        if (gt02a.stgps === 1) {
+            data.time = gt02a.time;
+            data.lonlat = [gt02a.longitude, gt02a.latitude]; // weiran device protocol
+            data.angle = gt02a.course; // weiran device protocol
+            data.speed = gt02a.velocity;
+        }
         data.stgps = gt02a.stgps;
         data.stpow = gt02a.stpow;
         data.stsos = gt02a.stsos;
