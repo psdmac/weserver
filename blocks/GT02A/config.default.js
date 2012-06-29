@@ -1,8 +1,8 @@
 exports.config = {
     // tcp service
     tcp_port: 2012,
-    tcp_timeout: 300000, // seconds
-    tcp_keepalive: 180000, // seconds
+    tcp_timeout: 600, // seconds
+    tcp_keepalive: 60, // seconds
     
     // websocket service
 	wss_port: 2013,
