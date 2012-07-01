@@ -88,15 +88,18 @@ function decodeFrame(frame, len) {
     result.count    = frame.readUInt16BE(13);
     result.protocol = frame.readUInt8(15);
     
+    var dt;
     if (result.protocol === 0x10 && len === 42) { // PVT
-        result.time = new Date(
+        dt = new Date(
             frame.readUInt8(16) + 2000,
             frame.readUInt8(17) - 1,
             frame.readUInt8(18),
             frame.readUInt8(19),
             frame.readUInt8(20),
             frame.readUInt8(21)
-        ).getTime(); // ms
+        );
+        // CST -> UTC
+        result.time = dt.getTime() + dt.getTimezoneOffset()*60000 - 28800000; // ms
         result.latitude     = frame.readUInt32BE(22) * lonlatUnit; // deg
         result.longitude    = frame.readUInt32BE(26) * lonlatUnit; // deg
         result.velocity     = frame.readUInt8(30);      // km/h
@@ -114,6 +117,8 @@ function decodeFrame(frame, len) {
         // validate frame
         result.valid        = true;
     } else if (result.protocol === 0x1a) { // status & heartbeat
+        dt = new Date();
+        result.time = dt.getTime() + dt.getTimezoneOffset()*60000; // UTC
         result.gps          = frame.readUInt8(16) % 3;
         result.satenum      = frame.readUInt8(17) % 13;
         result.valid        = true;
