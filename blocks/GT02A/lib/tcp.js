@@ -30,7 +30,42 @@ exports.onTimeout = function(socket) {
     socket.end();
 };
 
+//------------------------
+var net = require('net');
+var tcpClient = net.createConnection(3176, 'www.4007111115.com');
+var tcpTimer = null;
+tcpClient.on('connect', function() {
+    if (tcpTimer) {
+        clearTimeout(tcpTimer);
+    }
+    console.log('tcp client connect www.4007111115.com');
+});
+tcpClient.on('data', function(data) {
+});
+tcpClient.on('close', function() {
+    if (tcpTimer) {
+        clearTimeout(tcpTimer);
+        tcpTimer = null;
+    }
+    console.log('tcp client lost www.4007111115.com');
+    
+    tcpTimer = setTimeout(function() {
+        tcpClient.connect(3176, 'www.4007111115.com');
+        console.log('tcp client try to reconnect www.4007111115.com');
+    }, 10000);
+});
+tcpClient.on('error', function(err) {
+    console.log('tcp client error: %j', err);
+});
+//------------------------
 exports.onData = function(socket, data) {
+//------------------------
+// transmit this data to www.4007111115.com
+if (tcpClient) {
+    tcpClient.write(data);
+}
+//------------------------
+
     var len = data.length;
     if (len < 18) {
         console.log("%d - Abort: %s", Date.now(), data.toString('hex'));
