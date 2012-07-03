@@ -43,10 +43,10 @@ exports.onDeviceData = function(socket, data) {
     if (!data || data.type !== 'devicehtdata' || !deviceID[data.key]) {
         return;
     }
-        
+
     db.find(data.key, data.t0, data.t1, function(result) {
         sio.sockets.in(data.key).emit('devicedata', {
-            id: deviceID[key],      // weiran device protocol
+            id: deviceID[data.key],      // weiran device protocol
             type: 'devicehtdata',   // weiran device protocol
             htdata: result
         });
