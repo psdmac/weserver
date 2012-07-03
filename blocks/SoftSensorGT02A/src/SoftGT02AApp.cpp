@@ -68,8 +68,8 @@ void SoftGT02AApp::LoadConfigurations(const wxString& file)
 void SoftGT02AApp::SetBuffer()
 {
     m_pvt[0] = 0x68; m_pvt[1] = 0x68; m_pvt[2] = 0x25; m_pvt[3] = 0; m_pvt[4] = 0;
-    m_pvt[5] = 0x03; m_pvt[6] = 0x53; m_pvt[7] = 0x41; m_pvt[8] = 0x90;
-    m_pvt[9] = 0x36; m_pvt[10] = 0x59; m_pvt[11] = 0x23; m_pvt[12] = 0x22;
+    m_pvt[5] = 0x01; m_pvt[6] = 0x23; m_pvt[7] = 0x45; m_pvt[8] = 0x67;
+    m_pvt[9] = 0x89; m_pvt[10] = 0x01; m_pvt[11] = 0x23; m_pvt[12] = 0x45;
     unsigned short sn = 12345;
     // host > network
     sn = htons(sn);
@@ -85,8 +85,8 @@ void SoftGT02AApp::SetBuffer()
     m_pvt[40] = 0x0d; m_pvt[41] = 0x0a;
 
     m_pgg[0] = 0x68; m_pgg[1] = 0x68; m_pgg[2] = 19; m_pgg[3] = 0x06; m_pgg[4] = 0x04;
-    m_pgg[5] = 0x03; m_pgg[6] = 0x53; m_pgg[7] = 0x41; m_pgg[8] = 0x90;
-    m_pgg[9] = 0x36; m_pgg[10] = 0x59; m_pgg[11] = 0x23; m_pgg[12] = 0x22;
+    m_pgg[5] = 0x01; m_pgg[6] = 0x23; m_pgg[7] = 0x45; m_pgg[8] = 0x67;
+    m_pgg[9] = 0x89; m_pgg[10] = 0x01; m_pgg[11] = 0x23; m_pgg[12] = 0x45;
     sn = 12345; memcpy(m_pgg+13, &sn, 2);
     m_pgg[15] = 0x1a; m_pgg[16] = 0x01; m_pgg[17] = 4;
     m_pgg[18] = 90; m_pgg[19] = 90; m_pgg[20] = 90; m_pgg[21] = 90;
@@ -128,16 +128,15 @@ void SoftGT02AApp::OnTimer(wxTimerEvent& event)
         m_pvt[20] = dt.GetMinute(); m_pvt[21] = dt.GetSecond();
         // lonlat
         srand(dt.GetTicks());
-        int num = rand();
         unsigned int xx;
-        xx = ((30.0+(num%1000000)/1000000.0)*60.0*30000.0);
+        xx = ((30.0+(rand()%1000000)/1000000.0)*60.0*30000.0);
         xx = htonl(xx);
         memcpy(m_pvt+22, &xx, 4);
-        xx = ((120.0+(num%1000000)/1000000.0)*60.0*30000.0);
+        xx = ((120.0+(rand()%1000000)/1000000.0)*60.0*30000.0);
         xx = htonl(xx);
         memcpy(m_pvt+26, &xx, 4);
-        m_pvt[30] = num % 256;
-        unsigned short sn = num % 360;
+        m_pvt[30] = rand() % 256;
+        unsigned short sn = rand() % 360;
         sn = htons(sn);
         memcpy(m_pvt+31, &sn, 2);
 
@@ -155,10 +154,10 @@ void SoftGT02AApp::OnTimer(wxTimerEvent& event)
             unsigned short countpgg = htons(m_countPGG);
             memcpy(m_pgg+13, &countpgg, 2);
             //sleep(1);
-            m_pgg[3] = num % 7;
-            m_pgg[4] = num % 5;
-            m_pgg[18] = num % 100; m_pgg[19] = num % 100;
-            m_pgg[20] = num % 100; m_pgg[21] = num % 100;
+            m_pgg[3] = rand() % 7;
+            m_pgg[4] = rand() % 5;
+            m_pgg[18] = rand() % 100; m_pgg[19] = rand() % 100;
+            m_pgg[20] = rand() % 100; m_pgg[21] = rand() % 100;
             m_pClient->Write(m_pgg, sizeof(m_pgg));
             if (m_pClient->LastCount() > 0) {
                 m_countPGG++;

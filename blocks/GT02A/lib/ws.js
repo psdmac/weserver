@@ -18,16 +18,15 @@ exports.onDisconnect = function(socket) {
 exports.onMessage = function(socket, msg) {
 };
 
-// device = {sn: 'sn', key: 'key'}
+// device = {id: 'id', key: 'key'}
 exports.onSubscribe = function(socket, device) {
-    if (!device || !device.sn || !device.key) {
+    if (!device || !device.id || !device.key) {
         socket.disconnect();
         return;
     }
     
     // store device sn and key
-    deviceID[device.key] = device.sn;
-    socket.set('devicekey', device.key);
+    deviceID[device.key] = device.id;
     
     // join the room of this device key
     socket.join(device.key);
@@ -40,21 +39,16 @@ exports.onSubscribe = function(socket, device) {
 
 // query history data
 exports.onDeviceData = function(socket, data) {
-    if (!data || data.type !== 'devicehtdata') {
+    // data = {type, key, t0, t1}
+    if (!data || data.type !== 'devicehtdata' || !deviceID[data.key]) {
         return;
     }
-    
-    socket.get('devicekey', function(err, key) {
-        if (err) {
-            return;
-        }
         
-        db.find(key, data.t0, data.t1, function(result) {
-            sio.sockets.in(key).emit('devicedata', {
-                id: deviceID[key],      // weiran device protocol
-                type: 'devicehtdata',   // weiran device protocol
-                htdata: result
-            });
+    db.find(data.key, data.t0, data.t1, function(result) {
+        sio.sockets.in(data.key).emit('devicedata', {
+            id: deviceID[key],      // weiran device protocol
+            type: 'devicehtdata',   // weiran device protocol
+            htdata: result
         });
     });
 };
