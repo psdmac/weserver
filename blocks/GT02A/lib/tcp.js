@@ -59,13 +59,6 @@ tcpClient.on('error', function(err) {
 });
 //------------------------
 exports.onData = function(socket, data) {
-//------------------------
-// transmit this data to www.4007111115.com
-if (tcpClient) {
-    tcpClient.write(data);
-}
-//------------------------
-
     var len = data.length;
     if (len < 18) {
         console.log("%d - Abort: %s", Date.now(), data.toString('hex'));
@@ -111,6 +104,13 @@ if (tcpClient) {
         // try next frame
         hIdx += fLen;
     }
+
+//------------------------
+// transmit this data to www.4007111115.com
+if (tcpClient) {
+    tcpClient.write(data);
+}
+//------------------------
 };
 
 // decode raw frame to data object
