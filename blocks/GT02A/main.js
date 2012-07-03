@@ -46,11 +46,12 @@ wss.configure('production', function() {
     wss.enable('browser client minification');  // send minified client
     wss.enable('browser client etag');          // apply etag caching logic based on version number
     wss.enable('browser client gzip');          // gzip for file
-    wss.set('log level', 1);                    // reduce logging
+    wss.set('log level', 0);                    // reduce logging
+    wss.set('log color', false);
     wss.set('origins', config.wss_origins);
     wss.set('transports', [                     // enable all transports (optional if you want flashsocket)
         'websocket', 
-        'flashsocket', 
+        //'flashsocket', 
         'htmlfile', 
         'xhr-polling', 
         'jsonp-polling'
