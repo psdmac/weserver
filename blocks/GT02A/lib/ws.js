@@ -82,9 +82,7 @@ xx.events.on('gt02a', function(gt02a) {
         data.sgps = gt02a.satenum;
     }
 
-    if (!data.id && deviceID[gt02a.key]) {
-        data.id = deviceID[gt02a.key];
-    }
+    data.id = deviceID[gt02a.key] || data.id;
     
     if (data.id && sio) {
         sio.sockets.in(gt02a.key).emit('devicedata', data);
