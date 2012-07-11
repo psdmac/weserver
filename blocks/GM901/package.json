@@ -1,0 +1,10 @@
+{
+    "name":     "GM901",
+    "version":  "0.0.1",
+    "main":     "./main.js",
+    "private":  true,
+    "dependencies": {
+        "mongoskin":    ">= 0.3.6",
+        "zmq":          ">= 2.0.0"
+    }
+}

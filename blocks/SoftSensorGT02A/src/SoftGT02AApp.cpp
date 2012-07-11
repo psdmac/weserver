@@ -139,6 +139,13 @@ void SoftGT02AApp::OnTimer(wxTimerEvent& event)
         unsigned short sn = rand() % 360;
         sn = htons(sn);
         memcpy(m_pvt+31, &sn, 2);
+        
+        if (rand()%2) {
+            xx = htonl(15);
+        } else {
+            xx = htonl(31);
+        }
+        memcpy(m_pvt+36, &xx, 4);
 
         m_pClient->Write(m_pvt, sizeof(m_pvt));
         if (m_pClient->LastCount() > 0) {
