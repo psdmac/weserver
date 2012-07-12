@@ -7,3 +7,7 @@ console.log('Starts at %s in %s mode', new Date().toISOString(), process.env.NOD
 var tcp = require('./lib/tcp');
 tcp.start(config.tcp_port, config.tcp_timeout, config.tcp_keepalive);
 
+// start to communicate with central server
+
+// start to connect database
+
