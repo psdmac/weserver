@@ -8,6 +8,9 @@ var tcp = require('./lib/tcp');
 tcp.start(config.tcp_port, config.tcp_timeout, config.tcp_keepalive);
 
 // start to communicate with central server
+var zmq = require('../lib/zmq');
+zmq.start(config.cs_pub, config.cs_pull, config.cs_filter);
 
 // start to connect database
-
+var db = require('../lib/db');
+db.start(config.db);

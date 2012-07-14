@@ -7,6 +7,7 @@ exports.config = {
     // central server
 	cs_pub: 'tcp://127.0.0.1:2081',
 	cs_pull: 'tcp://127.0.0.1:2082',
+	cs_filter: 'GM901', // message filter of subscribe socket
 	
 	// database url
 	db: 'mongodb://127.0.0.1:27017/gm901'
