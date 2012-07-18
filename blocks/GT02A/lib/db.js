@@ -27,7 +27,7 @@ xx.events.on('gt02a', function(gt02a) {
         if (error) {
             console.log('%d - DB error: %j', Date.now(), error);
         }
-    })
+    });
     
     // ensure indexes
     if (!coIndexes[coName]) {

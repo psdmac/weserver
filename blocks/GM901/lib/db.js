@@ -5,40 +5,99 @@ var db;
 // entry
 exports.start = function(db) {
     db = mongoskin.db(db);
-    console.log("%d - Starts to connect database %s", Date.now(), db);
+    console.log("%d - Starts to open database %s", Date.now(), db);
 };
 
 var coIndexes = {}; // {co_key: true}
 
 // store device data
-xx.events.on('gt02a', function(gt02a) {
+xx.events.on('gm901', function(gm901) {
     // just valid pvt data can be stored
-    if (gt02a.protocol !== 0x10 || gt02a.stgps !== 1 || !db) {
+    if (!db) {
         return;
     }
+    if (gm901.type !== 0x12 || gm901.type !== 0x16) { // not pvt data
+        return;
+    }
+    if (gm901.gps !== 1) { // invalid pvt
+        return
+    }
     
-    var coName = 'co_' + gt02a.key;
+    var coName = 'co_' + gm901.key;
+    var item = null;
+    
+    if (gm901.type === 0x12 && gm901.gps === 1) { // valid gps
+        item = {
+            time: gm901.time,
+            lonlat: [gm901.lon, gm901.lat],
+            speed: gm901.speed,
+            course: gm901.course
+        };
+    } else if (gm901.type === 0x13) { // status
+        item = {
+            time: gm901.time,
+            defence: gm901.defence,
+            acc: gm901.acc,
+            charging: gm901.charging,
+            alarm: gm901.alarm,
+            gps: gm901.gps,
+            oil: gm901.oil,
+            voltage: gm901.voltage,
+            gsm: gm901.gsm
+        };
+    } else if (gm901.type === 0x16) { // gps & status
+        item = {
+            time: gm901.time,
+            defence: gm901.defence,
+            acc: gm901.acc,
+            charging: gm901.charging,
+            alarm: gm901.alarm,
+            gps: gm901.gps,
+            oil: gm901.oil,
+            voltage: gm901.voltage,
+            gsm: gm901.gsm
+        };
+        if (gm901.gps === 1) {
+            item.lonlat = [gm901.lon, gm901.lat];
+            item.speed = gm901.speed;
+            item.course = gm901.course;
+        }
+    }
+    
+    if (item) {
+        db.collection(coName).insert(item, function(error) {
+            if (error) {
+                console.log('%d - DB error: %j', Date.now(), error);
+            }
+        });
+    
+        // ensure indexes
+        if (!coIndexes[coName]) {
+            coIndexes[coName] = true;
+            db.collection(coName).ensureIndex({time: 1});
+        };
+    }
+});
+
+// store commands
+xx.events.on('command', function(cmd) {
+    var coName = 'co_commands';
     
     db.collection(coName).insert({
-        time: gt02a.time,
-        count: gt02a.count,
-        lonlat: [gt02a.longitude, gt02a.latitude],
-        angle: gt02a.course,
-        speed: gt02a.velocity,
-        stgps: gt02a.stgps,
-        stpow: gt02a.stpow,
-        stsos: gt02a.stsos,
-        stoff: gt02a.stoff
+        key: cmd.key,
+        mark: cmd.mark,
+        command: cmd.command,
+        response: ''
     }, function(error) {
         if (error) {
             console.log('%d - DB error: %j', Date.now(), error);
         }
-    })
+    });
     
     // ensure indexes
     if (!coIndexes[coName]) {
         coIndexes[coName] = true;
-        db.collection(coName).ensureIndex({time: 1});
+        db.collection(coName).ensureIndex({key: 1});
     }
 });
 

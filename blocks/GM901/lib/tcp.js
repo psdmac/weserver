@@ -60,7 +60,7 @@ tcp.on('connection', function(socket) {
         var hIdx = 0; // frame head index
         var fLen = 0; // frame length
         var receivedCRC = 0x0000, calculatedCRC = 0xffff;
-        var protocol, fsn; // frame serial number
+        var type, fsn; // frame serial number
         var gm901 = null; // decoded data object
         while (hIdx < (len-10)) {
             // check frame head
@@ -88,14 +88,14 @@ tcp.on('connection', function(socket) {
             }
         
             // this is a valid frame
-            protocol = data.readUInt8(hIdx+3);
+            type = data.readUInt8(hIdx+3);
             fsn = data.readUInt16BE(hIdx+fLen-6);
             
             // decode frame
             if (hIdx === 0 && fLen === len) { // single frame
-                gm901 = decodeFrame(protocol, data);
+                gm901 = decodeFrame(type, data);
             } else { // one of multiple frame
-                gm901 = decodeFrame(protocol, data.slice(hIdx, hIdx+fLen));
+                gm901 = decodeFrame(type, data.slice(hIdx, hIdx+fLen));
             }
       
             if (!gm901 || !gm901.valid) {
@@ -105,9 +105,11 @@ tcp.on('connection', function(socket) {
             }
             
             // check registration
-            if (protocol === 0x01) {
+            if (type === 0x01) {
+                gm901.key = md5(gm901.imei);
                 setIMEI(socketRemoteAddress, gm901.imei);
-                setKey(gm901.imei, md5(gm901.imei));
+                setIMEIByKey(gm901.key, gm901.imei);
+                setKey(gm901.imei, gm901.key);
                 setSocket(gm901.imei, socket);
             } else {
                 gm901.imei = getIMEI(socketRemoteAddress);
@@ -120,8 +122,8 @@ tcp.on('connection', function(socket) {
             }
             
             // feedback
-            if (protocol === 0x01 || protocol === 0x13 || protocol === 0x16) {
-                socket.write(getFeedback(protocol, fsn));
+            if (type === 0x01 || type === 0x13 || type === 0x16) {
+                socket.write(getFeedback(type, fsn));
             }
             
             // emit event with this epoch data
@@ -136,6 +138,7 @@ tcp.on('connection', function(socket) {
 var addr_imei = {}; // map of addr -> imei
 var imei_sock = {}; // map of imei -> socket
 var imei_dkey = {}; // map of imei -> device key
+var dkey_imei = {}; // map of dkey -> imei
 
 function setIMEI(addr, imei) {
     if (addr) {
@@ -176,9 +179,22 @@ function getKey(imei) {
     return null;
 }
 
-function getFeedback(protocol, fsn) {
+function setIMEIByKey(key, imei) {
+    if (key) {
+        dkey_imei[key] = imei;
+    }
+}
+
+function getIMEIByKey(key) {
+    if (key) {
+        return dkey_imei[key];
+    }
+    return null;
+}
+
+function getFeedback(type, fsn) {
     var feedback = new Buffer('787805010001ffff0d0a', 'hex');
-    feedback.writeUInt8(protocol, 3);
+    feedback.writeUInt8(type, 3);
     feedback.writeUInt16BE(fsn, 4);
     feedback.writeUInt16BE(crc(feedback.slice(2, 6)), 6);
     
@@ -188,20 +204,20 @@ function getFeedback(protocol, fsn) {
 
 var lonlatUnit = 1/(500*3600); // degree
 
-function decodeFrame(protocol, frame) {
+function decodeFrame(type, frame) {
     console.log('>> %s', frame.toString('hex'));
     
     var result = {
-        protocol: protocol,
+        type: type,
         valid: false
     };
     
     var dt;
     var len = frame.length;
-    if (protocol === 0x01) { // register
+    if (type === 0x01) { // register
         result.imei  = frame.toString('hex', 4, 12).slice(1);
         result.valid = true;
-    } else if (protocol === 0x12) { // gps
+    } else if (type === 0x12) { // gps
         dt = new Date(
             frame.readUInt8(4) + 2000,
             frame.readUInt8(5) - 1,
@@ -222,7 +238,7 @@ function decodeFrame(protocol, frame) {
         result.gps      = (frame[20]>>4) & 0x01;                                // 0: not, 1: positioning
         result.dgps     = (frame[20]>>5) & 0x01;                                // 0: realtime, 1: differential
         result.valid = true;
-    } else if (protocol === 0x13) { // status
+    } else if (type === 0x13) { // status
         dt = new Date();
         result.time     = dt.getTime() + dt.getTimezoneOffset()*60000; // UTC
         result.defence  = frame[4] & 0x01;      // 0: off, 1: on
@@ -234,7 +250,7 @@ function decodeFrame(protocol, frame) {
         result.voltage  = frame.readUInt8(5);   // 0 ~ 6
         result.gsm      = frame.readUInt8(6);   // 0 ~ 4
         result.valid    = true;
-    } else if (protocol === 0x15) { // command response
+    } else if (type === 0x15) { // command response
         dt = new Date();
         result.time     = dt.getTime() + dt.getTimezoneOffset()*60000;  // UTC
         result.len      = frame.readUInt8(4);                           // command length
@@ -244,7 +260,7 @@ function decodeFrame(protocol, frame) {
             result.response = result.response.slice(0, result.response.indexOf('\u0000'));
         }
         result.valid    = true;
-    } else if (protocol === 0x16) { // gps & status
+    } else if (type === 0x16) { // gps & status
         // gps
         dt = new Date(
             frame.readUInt8(4) + 2000,
@@ -299,9 +315,9 @@ function encodeCommand(command, mark, fsn) {
     var frame = new Buffer(15 + len);
     frame[0] = 0x78; frame[1] = 0x78;                           // frame head
     frame.writeUInt8(10 + len, 2);                              // frame content size
-    frame.writeUInt8(0x80, 3);                                  // protocol
+    frame.writeUInt8(0x80, 3);                                  // type
     frame.writeUInt8(4 + len, 4);                               // encoded command size
-    frame.writeUInt32BE(mark, 5);                               // server side mark of this command
+    frame.write(mark, 5, 4, 'hex');                             // server side mark of this command
     frame.write(command, 9, len, 'ascii');                      // command ascii string
     frame.writeUInt16BE(fsn, 9+len);                            // frame serial number
     frame.writeUInt16BE(crc(frame.slice(2, 11+len)), 11+len);   // CRC check sum
@@ -314,17 +330,26 @@ function encodeCommand(command, mark, fsn) {
 // send command to device of imei
 // parameters:
 //    imei - device imei
-// command - ascii string of command
-// returns server side mark hex string on success or null on failure
-// eg: sendCommand('684612052104960','DWXX,000000#');
-function sendCommand(imei, command) {
+//    mark - 4 bytes hex string of server side mark
+// command - ascii string of command to be sent to device
+// returns true on success or false on failure
+// eg: sendCommand('684612052104960','DWXX,000000#', '12345678');
+function sendCommand(imei, mark, command) {
     // get socket by imei
     var socket = getSocket(imei);
     if (socket) {
-        var frame = encodeCommand(command, Math.round(Date.now()/1000), 0);
+        var frame = encodeCommand(command, mark, 0);
         socket.write(frame);
-        return frame.toString('hex', 5, 9);
+        return true;
     }
     
-    return null;
+    return false;
 }
+
+// command event handler
+xx.events.on('command', function(cmd) {
+    var imei = getIMEIByKey(cmd.key);
+    if (imei) {
+        sendCommand(imei, cmd.mark, cmd.command);
+    }
+});
