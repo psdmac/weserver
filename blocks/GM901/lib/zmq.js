@@ -6,21 +6,29 @@ var pushSocket = zmq.socket('push');
 var key_last = {}; // key -> last epoch data
 var key_push = {}; // key -> true/false
 
+var message_filter = '';
+
 // the only exported entry
 exports.start = function(cs_pub, cs_pull, cs_filter) {
     subSocket.connect(cs_pub);
     subSocket.subscribe(cs_filter);
-    console.log("%d - Starts to subscribe %s---- message from", Date.now(), cs_filter, cs_pub);
+    console.log("%d - Starts to subscribe %s message from", Date.now(), cs_filter, cs_pub);
     pushSocket.connect(cs_pull);
     console.log("%d - Starts to push device events to %s", Date.now(), cs_pull);
+    // save a copy
+    message_filter = cs_filter;
 };
 
 subSocket.on('message', function(msg) {
-    console.log('pub > %s', msg.toString('utf8'));
-    // subscribe/unsubscribe GM901 data, JOSN string
-    
-    msg = JSON.parse(msg.toString('utf8'));
-    console.log('pub > %j', msg);
+    // buffer -> string
+    msg = msg.toString('utf8');
+    console.log('pub > %s', msg);
+    // remove message head of filter
+    msg = msg.slice(message_filter.length);
+    console.log('pub > %s', msg);
+    // parse JSON string to object
+    msg = JSON.parse(msg);
+    console.log('pub > %s', msg);
     
     if (msg && msg.key) {
         // realtime data

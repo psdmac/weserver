@@ -3,9 +3,9 @@ var xx = require("./xx");
 var db;
 
 // entry
-exports.start = function(db) {
-    db = mongoskin.db(db);
-    console.log("%d - Starts to open database %s", Date.now(), db);
+exports.start = function(database) {
+    db = mongoskin.db(database);
+    console.log("%d - Starts to open database %s", Date.now(), database);
 };
 
 var coIndexes = {}; // {co_key: true}
